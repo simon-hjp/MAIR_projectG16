@@ -1,0 +1,4 @@
+# Jupyter notebooks should be personal for testing purposes only
+.ipynb
+# Might be too large for git to handle
+*.dat
