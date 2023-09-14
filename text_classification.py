@@ -1,55 +1,56 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-# "" in utterance
-def utterance_contains_word(utterance, words):
-    """Helper function to determine whether an utterance contains any word in a given list"""
-    for word in words:
-        if word in utterance:
-            return True
-    return False
 
-def baseline_keyword_algorithm(utterances) -> list:
-    """Predict the dialog act of utterances using a set of rules."""
-    out = []
-    for utterance in utterances:
-        if utterance_contains_word(utterance, ["food", "restaurant", "town", "east", "west", "south", "north", "part"]):
-        # if "any" in utterance or "food" in utterance or "restaurant" in utterance or "town" in utterance or "part" in utterance or "east" in utterance or "west" in utterance:
-            out.append("inform")
-        elif "it" in utterance and "is" in utterance:
-            out.append("confirm")
-        elif utterance_contains_word(utterance, ["yes", "right"]):
-            out.append("affirm")
-        elif utterance_contains_word(utterance, ["number", "phone", "address", "post"]):
-            out.append("request")
-        elif "thank" in utterance and "you" in utterance:
-            out.append("thankyou")
-        elif utterance_contains_word(utterance, ["noise", "sil", "unintelligible"]):
-            out.append("null")
-        # elif "good" in utterance or "bye" in utterance:
-        elif utterance_contains_word(utterance, ["good", "bye"]):
-            out.append("bye")
-        elif ("how" in utterance and "about" in utterance) or "else" in utterance:
-            out.append("reqalts")
-        elif "no" in utterance:
-            out.append("negate")
-        elif utterance_contains_word(utterance, ["hi", "hello"]):
-            out.append("hello")
-        elif ("repeat" in utterance and "that" in utterance) or "repeat" in utterance:
-            out.append("repeat")
-        elif "okay" in utterance:
-            out.append("ack")
-        elif ("start" in utterance and "over" in utterance) or "start" in utterance:
-            out.append("restart")
-        elif utterance_contains_word(utterance, ["wrong", "dont"]):
-            out.append("deny")
-        elif "more" in utterance:
-            out.append("reqmore")
-        else:
-            out.append("inform")  # Can replace this with 'error' later on if necessary for evaluation.
-    return out
+class RuleBaselineClassifier():
+    def utterance_contains_word(self, utterance, words):
+        """Helper function to determine whether an utterance contains any word in a given list"""
+        for word in words:
+            if word in utterance:
+                return True
+        return False
 
-class MajorityBaseline:
+    def predict_act(self, utterances) -> list:
+        """Predict the dialog act of utterances using a set of rules."""
+        out = []
+        for utterance in utterances:
+            if self.utterance_contains_word(utterance, ["food", "restaurant", "town", "east", "west", "south", "north", "part"]):
+            # if "any" in utterance or "food" in utterance or "restaurant" in utterance or "town" in utterance or "part" in utterance or "east" in utterance or "west" in utterance:
+                out.append("inform")
+            elif "it" in utterance and "is" in utterance:
+                out.append("confirm")
+            elif self.utterance_contains_word(utterance, ["yes", "right"]):
+                out.append("affirm")
+            elif self.utterance_contains_word(utterance, ["number", "phone", "address", "post"]):
+                out.append("request")
+            elif "thank" in utterance and "you" in utterance:
+                out.append("thankyou")
+            elif self.utterance_contains_word(utterance, ["noise", "sil", "unintelligible"]):
+                out.append("null")
+            # elif "good" in utterance or "bye" in utterance:
+            elif self.utterance_contains_word(utterance, ["good", "bye"]):
+                out.append("bye")
+            elif ("how" in utterance and "about" in utterance) or "else" in utterance:
+                out.append("reqalts")
+            elif "no" in utterance:
+                out.append("negate")
+            elif self.utterance_contains_word(utterance, ["hi", "hello"]):
+                out.append("hello")
+            elif ("repeat" in utterance and "that" in utterance) or "repeat" in utterance:
+                out.append("repeat")
+            elif "okay" in utterance:
+                out.append("ack")
+            elif ("start" in utterance and "over" in utterance) or "start" in utterance:
+                out.append("restart")
+            elif self.utterance_contains_word(utterance, ["wrong", "dont"]):
+                out.append("deny")
+            elif "more" in utterance:
+                out.append("reqmore")
+            else:
+                out.append("inform")  # Can replace this with 'error' later on if necessary for evaluation.
+        return out
+
+class MajorityBaselineClassifier:
     """Baseline model for text classification that classifies every input as the most common class
     in the dataset."""
 
@@ -77,14 +78,22 @@ class MajorityBaseline:
 
 
 def run():
-    """Initiate the command-line for the user.
+    """Test each model, report performance, and then initiate the command-line for the user.
     """
-    df_train, df_test = import_data(
-        "C:\\Users\\spals\\AI\\Master\\MAIR\\Data\\dialog_acts.dat"
-    )
-    majority_model = MajorityBaseline()
+    df_train, df_test = import_data("dialog_acts.dat")
+    # majority baseline
+    majority_model = MajorityBaselineClassifier()
     majority_model.fit_training_data(df_train)
     # evaluate_model(majority_model, df_test)
+
+    # rule-based baseline
+    baseline_model = RuleBaselineClassifier()
+    evaluate_model(baseline_model, df_test)
+
+    # decision tree
+    
+
+
     user_choice = input(
         "Please specify which model you want to test:\n\
             A: majority class baseline\n\
@@ -93,18 +102,22 @@ def run():
             D: machine-learning classifier 2\n"
     ).upper()
     if user_choice == "A":
-        user_testing(model="majority")
+        model = majority_model
     elif user_choice == "B":
-        user_testing(model="rules")
+        model = RuleBaseline()
     elif user_choice == "C":
-        pass
+        print('Not implemented yet.')
+        run()
+        return
     elif user_choice == "D":
-        pass
+        print('Not implemented yet.')
+        run()
+        return
     else:
         print("Please choose one of the listed options.\n")
         run()
-    evaluate_model(model, df_test)
     user_testing(model)
+    return
 
 
 def import_data(data_dir: str):
@@ -125,6 +138,8 @@ def import_data(data_dir: str):
     # create train- and test set
     df_train, df_test = train_test_split(df, test_size=0.15)
     return df_train, df_test
+
+def create_bags(df: pd.DataFrame):
 
 
 def user_testing(model):
