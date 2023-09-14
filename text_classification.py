@@ -80,7 +80,7 @@ def run():
     """Initiate the command-line for the user.
     """
     df_train, df_test = import_data(
-        "C:\\Users\\spals\\AI\\Master\\MAIR\\Data\\dialog_acts.dat"
+        ".\\dialog_acts.dat"
     )
     majority_model = MajorityBaseline()
     majority_model.fit_training_data(df_train)
@@ -93,17 +93,18 @@ def run():
             D: machine-learning classifier 2\n"
     ).upper()
     if user_choice == "A":
-        user_testing(model="majority")
+        model = MajorityBaseline
     elif user_choice == "B":
-        user_testing(model="rules")
+        model = baseline_keyword_algorithm
     elif user_choice == "C":
-        pass
+        print("Please choose another model, since this one has not been implemented\n")
+        run()
     elif user_choice == "D":
-        pass
+        print("Please choose another model, since this one has not been implemented\n")
+        run()
     else:
         print("Please choose one of the listed options.\n")
         run()
-    evaluate_model(model, df_test)
     user_testing(model)
 
 
@@ -137,12 +138,11 @@ def user_testing(model):
     continue_testing = True
     while continue_testing:
         user_utterance = input(
-            "Please provide the sentence the model has to classify. To exit the program, enter '1'.\n"
+            "Please provide the sentence the model has to classify. \nTo exit the program, enter '1'.\n"
         )
         if user_utterance == "1":
             return
         print(model.predict_act(user_utterance))
-    return
 
 
 def evaluate_model(model, df_test):
@@ -155,4 +155,5 @@ def evaluate_model(model, df_test):
     pass
 
 
-run()
+if __name__ == "__main__":
+    run()
