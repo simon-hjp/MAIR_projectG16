@@ -106,13 +106,11 @@ def run():
     elif user_choice == "B":
         model = RuleBaseline()
     elif user_choice == "C":
-        print('Not implemented yet.')
+        print("Please choose another model, since this one has not been implemented\n")
         run()
-        return
     elif user_choice == "D":
-        print('Not implemented yet.')
+        print("Please choose another model, since this one has not been implemented\n")
         run()
-        return
     else:
         print("Please choose one of the listed options.\n")
         run()
@@ -152,12 +150,11 @@ def user_testing(model):
     continue_testing = True
     while continue_testing:
         user_utterance = input(
-            "Please provide the sentence the model has to classify. To exit the program, enter '1'.\n"
+            "Please provide the sentence the model has to classify. \nTo exit the program, enter '1'.\n"
         )
         if user_utterance == "1":
             return
         print(model.predict_act(user_utterance))
-    return
 
 
 def evaluate_model(model, df_test):
@@ -170,4 +167,5 @@ def evaluate_model(model, df_test):
     pass
 
 
-run()
+if __name__ == "__main__":
+    run()
