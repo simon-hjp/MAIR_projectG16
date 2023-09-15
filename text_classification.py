@@ -36,23 +36,6 @@ def import_data(data_dir: str, drop_duplicates = False):
     df_train, df_test = train_test_split(df, test_size=0.15)
     return df_train, df_test
 
-def words_tokenizer(string):
-    return string.split()
-
-# def transform_data(df_train: pd.DataFrame, df_test: pd.DataFrame):
-#     """Transform utterance dataframe into machine-readable bag-of-words representation."""
-#     labelencoder = LabelEncoder()
-#     labelencoder.fit(df_train["dialog_act"])
-#     labelencoder.transform(df_train["dialog_act"])
-#     labelencoder.transform(df_test["dialog_act"])
-
-# def bag_of_words(df_train, df_test):
-#     """Transform text data into bag-of-words representation using TF-IDF."""
-#     vectorizer = TfidfVectorizer()
-#     X_train = vectorizer.fit_transform(df_train['utterance_content'])
-#     X_test = vectorizer.transform(df_test['utterance_content'])
-#     return X_train, X_test
-
 
 ###
 ##### Baseline classifiers
@@ -165,11 +148,12 @@ class DecisionTreeActsClassifier:
         self.oov_token = 0  # Special integer for out-of-vocabulary words
 
     def train(self, X_train, y_train):
-        """Train the logistic regression model and the label encoder."""
+        """Fit the label encoder, the bag-of-words vectorizer and train the model."""
         self.label_encoder.fit(y_train)
         y_train_encoded = self.label_encoder.transform(y_train)
         self.vectorizer.fit(X_train)
         X_train_bow = self.vectorizer.transform(X_train)
+
         self.model.fit(X_train_bow, y_train_encoded)
 
     def predict(self, X_test):
@@ -297,7 +281,6 @@ def evaluate_model(model, df_test):
     print("\tRecall score:", recall_score(y_test, y_hat, average="macro", zero_division=0))
     print("\tPrecision score:", precision_score(y_test, y_hat, average="macro", zero_division=0),)
     print("\tF1 score:", f1_score(y_test, y_hat, average="macro"))
-
 
 ###
 ##### Program control flow
