@@ -6,6 +6,7 @@ from sklearn.metrics import precision_recall_fscore_support
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from scipy.sparse import spmatrix
 
 ###
 ##### Data importing and preprocessing
@@ -31,6 +32,8 @@ def import_data(data_dir: str):
     df_train, df_test = train_test_split(df, test_size=0.15)
     return df_train, df_test
 
+def words_tokenizer(string):
+    return string.split()
 
 # def transform_data(df_train: pd.DataFrame, df_test: pd.DataFrame):
 #     """Transform utterance dataframe into machine-readable bag-of-words representation."""
@@ -143,11 +146,9 @@ class RuleBaselineClassifier:
         """Predict every utterance in a given dataframe of features."""
         return [self.predict_act(element) for element in X_test]
 
-
 ###
 ##### Machine learning classifiers
 ###
-
 
 class LogisticRegressionClassifier:
     """Logistic Regression classifier for dialog act classification."""
@@ -169,11 +170,8 @@ class LogisticRegressionClassifier:
 
     def predict(self, X_test):
         """Predict dialog acts for test data."""
-        # X_test_bow = self.vectorizer.transform(X_test)
-        print(list(X_test))
-        print(X_test.head())
         X_test_bow = [self.transform_input(utterance) for utterance in X_test]
-        print(X_test.head())
+        X_test_bow = np.array(X_test_bow).reshape(len(X_test_bow), -1)
         return self.model.predict(X_test_bow)
 
     def predict_act(self, utterance):
@@ -191,21 +189,17 @@ class LogisticRegressionClassifier:
 
     def transform_input(self, utterance: str):
         """Transform the input utterance into a TF-IDF vector with OOV handling."""
+        # Transform the utterance into a bag-of-words representation
         utterance_bow = self.vectorizer.transform([utterance])
 
-        # Get the feature names from the vectorizer
-        feature_names = self.vectorizer.get_feature_names_out()
+        # Calculate the average TF-IDF vector for the words in the utterance
+        if utterance_bow.nnz > 0:
+            average_vector = utterance_bow.sum(axis=0) / utterance_bow.nnz
+        else:
+            # Handle the case where there are no words in the utterance (empty string)
+            average_vector = np.zeros((1, len(self.vectorizer.get_feature_names_out())))
 
-        # Initialize a vector with zeros (OOV tokens)
-        oov_vector = np.zeros(len(feature_names))
-
-        # Process the TF-IDF vector to handle OOV words
-        for word in utterance.split():
-            if word in feature_names:
-                word_index = np.where(feature_names == word)
-                oov_vector[word_index] = utterance_bow[self.oov_token, word_index]
-
-        return oov_vector
+        return average_vector
 
 
 ###
@@ -213,7 +207,7 @@ class LogisticRegressionClassifier:
 ###
 
 
-def user_testing(model, user_choice):
+def user_testing(model):
     """Predict an utterance given by the user with a trained model.
 
     Parameters:
@@ -222,16 +216,10 @@ def user_testing(model, user_choice):
     while True:
         user_utterance = input(
             "Please provide the sentence the model has to classify. \nTo exit the program, enter '1'.\n"
-        )
+        ).lower()
         if user_utterance == "1":
             return
-        if model.name == "Logistic regression classifier":
-            print(
-                model.predict_act([user_utterance])
-            )  # logistic regression requires a list
-        else:
-            print(model.predict_act(user_utterance))
-
+        model.predict_act(user_utterance)
 
 def evaluate_model(model, df_test):
     """Evaluate the performance of a trained model on the test dataset.
@@ -242,16 +230,16 @@ def evaluate_model(model, df_test):
     """
     X_test = df_test["utterance_content"]
     y_test = df_test["dialog_act"]
+
+    if hasattr(model, 'label_encoder'):
+        # Encode the ground truth labels using the model's label encoder
+        y_test = model.label_encoder.transform(y_test)
+
     y_hat = model.predict(X_test)
     print(f"{model.name} performance evaluation")
     print("\tAccuracy score:", accuracy_score(y_test, y_hat))
-    print(
-        "\tRecall score:", recall_score(y_test, y_hat, average="macro", zero_division=0)
-    )
-    print(
-        "\tPrecision score:",
-        precision_score(y_test, y_hat, average="macro", zero_division=0),
-    )
+    print("\tRecall score:", recall_score(y_test, y_hat, average="macro", zero_division=0))
+    print("\tPrecision score:",precision_score(y_test, y_hat, average="macro", zero_division=0),)
     print("\tF1 score:", f1_score(y_test, y_hat, average="macro"))
 
 
@@ -273,9 +261,6 @@ def run():
     rule_model = RuleBaselineClassifier()
     evaluate_model(rule_model, df_test)
 
-    # # transform utterances to BOW
-    # X_train_bow, X_test_bow = bag_of_words(df_train, df_test)
-
     # decision tree
 
     # logistic regression
@@ -291,8 +276,10 @@ def run():
             "Please specify which model you want to test:\n\
         A: majority class baseline\n\
         B: rule-based baseline\n\
-        C: machine-learning classifier 1\n\
-        D: machine-learning classifier 2\n"
+        C: decision tree classifier\n\
+        D: decision tree classifier with deduplicated data\n\
+        E: logistic regression classifier\n\
+        F: logistic regression classifier with deduplicated data\n" 
         ).upper()
         if user_choice == "A":
             model = majority_model
@@ -306,6 +293,14 @@ def run():
             )
             continue
         elif user_choice == "D":
+            print(
+                "Please choose another model, since this one has not been implemented\n"
+            )
+            continue
+        elif user_choice == 'E':
+            model = lr_classifier
+            ask_input = False
+        elif user_choice == "F":
             print(
                 "Please choose another model, since this one has not been implemented\n"
             )
