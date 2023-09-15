@@ -1,7 +1,11 @@
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import precision_recall_fscore_support
+from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
 
 ###
 ##### Data importing and preprocessing
@@ -28,9 +32,19 @@ def import_data(data_dir: str):
     return df_train, df_test
 
 
-def transform_data(df_train: pd.DataFrame, df_test: pd.DataFrame):
-    """Transform utterance dataframe into machine-readable bag-of-words representation with integer encoded labels."""
-    pass
+# def transform_data(df_train: pd.DataFrame, df_test: pd.DataFrame):
+#     """Transform utterance dataframe into machine-readable bag-of-words representation."""
+#     labelencoder = LabelEncoder()
+#     labelencoder.fit(df_train["dialog_act"])
+#     labelencoder.transform(df_train["dialog_act"])
+#     labelencoder.transform(df_test["dialog_act"])
+
+# def bag_of_words(df_train, df_test):
+#     """Transform text data into bag-of-words representation using TF-IDF."""
+#     vectorizer = TfidfVectorizer()
+#     X_train = vectorizer.fit_transform(df_train['utterance_content'])
+#     X_test = vectorizer.transform(df_test['utterance_content'])
+#     return X_train, X_test
 
 
 ###
@@ -135,17 +149,75 @@ class RuleBaselineClassifier:
 ###
 
 
+class LogisticRegressionClassifier:
+    """Logistic Regression classifier for dialog act classification."""
+
+    def __init__(self):
+        self.name = "Logistic regression classifier"
+        self.model = LogisticRegression()
+        self.label_encoder = LabelEncoder()
+        self.vectorizer = TfidfVectorizer()
+        self.oov_token = 0  # Special integer for out-of-vocabulary words
+
+    def train(self, X_train, y_train):
+        """Train the logistic regression model and the label encoder."""
+        self.label_encoder.fit(y_train)
+        y_train_encoded = self.label_encoder.transform(y_train)
+        self.vectorizer.fit(X_train)
+        X_train_bow = self.vectorizer.transform(X_train)
+        self.model.fit(X_train_bow, y_train_encoded)
+
+    def predict(self, X_test):
+        """Predict dialog acts for test data."""
+        # X_test_bow = self.vectorizer.transform(X_test)
+        print(list(X_test))
+        print(X_test.head())
+        X_test_bow = [self.transform_input(utterance) for utterance in X_test]
+        print(X_test.head())
+        return self.model.predict(X_test_bow)
+
+    def predict_act(self, utterance):
+        """Predict the dialog act of an utterance."""
+        # Transform the utterance into a bag-of-words representation
+        utterance_bow = self.vectorizer.transform([utterance])
+
+        # Predict the dialog act using the trained logistic regression model
+        predicted_label_encoded = self.model.predict(utterance_bow)
+
+        # Decode the predicted label
+        predicted_label = self.label_encoder.inverse_transform(predicted_label_encoded)
+
+        return predicted_label[0] if len(predicted_label) > 0 else None
+
+    def transform_input(self, utterance: str):
+        """Transform the input utterance into a TF-IDF vector with OOV handling."""
+        utterance_bow = self.vectorizer.transform([utterance])
+
+        # Get the feature names from the vectorizer
+        feature_names = self.vectorizer.get_feature_names_out()
+
+        # Initialize a vector with zeros (OOV tokens)
+        oov_vector = np.zeros(len(feature_names))
+
+        # Process the TF-IDF vector to handle OOV words
+        for word in utterance.split():
+            if word in feature_names:
+                word_index = np.where(feature_names == word)
+                oov_vector[word_index] = utterance_bow[self.oov_token, word_index]
+
+        return oov_vector
+
+
 ###
 ##### Evaluation
 ###
 
 
-def user_testing(model):
+def user_testing(model, user_choice):
     """Predict an utterance given by the user with a trained model.
 
     Parameters:
-    - model: {string} specify which model should be used.
-
+    - model: model to be used.
     """
     while True:
         user_utterance = input(
@@ -153,7 +225,12 @@ def user_testing(model):
         )
         if user_utterance == "1":
             return
-        print(model.predict_act(user_utterance))
+        if model.name == "Logistic regression classifier":
+            print(
+                model.predict_act([user_utterance])
+            )  # logistic regression requires a list
+        else:
+            print(model.predict_act(user_utterance))
 
 
 def evaluate_model(model, df_test):
@@ -168,7 +245,9 @@ def evaluate_model(model, df_test):
     y_hat = model.predict(X_test)
     print(f"{model.name} performance evaluation")
     print("\tAccuracy score:", accuracy_score(y_test, y_hat))
-    print("\tRecall score:", recall_score(y_test, y_hat, average="macro"))
+    print(
+        "\tRecall score:", recall_score(y_test, y_hat, average="macro", zero_division=0)
+    )
     print(
         "\tPrecision score:",
         precision_score(y_test, y_hat, average="macro", zero_division=0),
@@ -194,15 +273,22 @@ def run():
     rule_model = RuleBaselineClassifier()
     evaluate_model(rule_model, df_test)
 
+    # # transform utterances to BOW
+    # X_train_bow, X_test_bow = bag_of_words(df_train, df_test)
+
     # decision tree
 
-    # other ML algorithm
+    # logistic regression
+    lr_classifier = LogisticRegressionClassifier()
+    lr_classifier.model = LogisticRegression(max_iter=10000)
+    lr_classifier.train(df_train["utterance_content"], df_train["dialog_act"])
+    evaluate_model(lr_classifier, df_test)
 
     model = None
     ask_input = True
     while ask_input:
         user_choice = input(
-        "Please specify which model you want to test:\n\
+            "Please specify which model you want to test:\n\
         A: majority class baseline\n\
         B: rule-based baseline\n\
         C: machine-learning classifier 1\n\
