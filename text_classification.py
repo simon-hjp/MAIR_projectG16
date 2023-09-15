@@ -8,12 +8,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.tree import DecisionTreeClassifier
 
+
 ###
 ##### Data importing and preprocessing
 ###
 
-
-def import_data(data_dir: str):
+def import_data(data_dir: str, drop_duplicates = False):
     """Read data and return it as a dataframe.
 
     Parameters:
@@ -28,6 +28,10 @@ def import_data(data_dir: str):
         pat=" ", n=1, expand=True
     )
     df.drop("Datapoint", axis=1, inplace=True)
+
+    if drop_duplicates:
+        df = df.drop_duplicates(keep='first', inplace=False, ignore_index=False)
+
     # create train- and test set
     df_train, df_test = train_test_split(df, test_size=0.15)
     return df_train, df_test
@@ -159,7 +163,7 @@ class DecisionTreeActsClassifier:
         self.label_encoder = LabelEncoder()
         self.vectorizer = TfidfVectorizer()
         self.oov_token = 0  # Special integer for out-of-vocabulary words
-    
+
     def train(self, X_train, y_train):
         """Train the logistic regression model and the label encoder."""
         self.label_encoder.fit(y_train)
@@ -167,7 +171,7 @@ class DecisionTreeActsClassifier:
         self.vectorizer.fit(X_train)
         X_train_bow = self.vectorizer.transform(X_train)
         self.model.fit(X_train_bow, y_train_encoded)
-    
+
     def predict(self, X_test):
         """Predict dialog acts for test data."""
         X_test_bow = [self.transform_input(utterance) for utterance in X_test]
@@ -267,11 +271,11 @@ def user_testing(model):
     while True:
         # user input sentence converted to lower case to prevent errors
         user_utterance = input("Please provide the sentence the model has to classify. \nTo exit the program, enter '1'.\n>>").lower()
-        print(f'You inputted \"{user_utterance}\"')
+        print(f'Your utterance was \"{user_utterance}\"')
         if user_utterance == "1":
             break
         else:
-            print(model.predict_act(user_utterance))
+            print(f"The {model.name} guessed:{model.predict_act(user_utterance)}")
 
 def evaluate_model(model, df_test):
     """Evaluate the performance of a trained model on the test dataset.
@@ -300,11 +304,13 @@ def evaluate_model(model, df_test):
 ###
 
 def run():
-    """Test each model, report performance, and then initiate the command-line for the user."""
-    df_train, df_test = import_data("dialog_acts.dat")
-    df_train_deduplicated = df_train.drop_duplicates(keep='first', ignore_index=False)
-    df_test_deduplicated = df_test.drop_duplicates(keep='first', ignore_index=False)
+    """Test each model, report performance, and then initiate the command-line for the user.
+    """
 
+    # Use this boolean to drop duplicate values from the data source
+    drop = False
+
+    df_train, df_test = import_data(data_dir="dialog_acts.dat",drop_duplicates=drop)
     # majority baseline
     majority_model = MajorityBaselineClassifier()
     majority_model.train(df_train)
@@ -319,57 +325,37 @@ def run():
     dt_classifier.train(df_train["utterance_content"], df_train["dialog_act"])
     evaluate_model(dt_classifier, df_test)
 
-    # decision tree, deduplicated
-    dt_classifier_deduplicated = DecisionTreeActsClassifier()
-    dt_classifier_deduplicated.name += " with deduplicated data"
-    dt_classifier_deduplicated.train(df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"])
-    evaluate_model(dt_classifier_deduplicated, df_test_deduplicated)
-
     # logistic regression
     lr_classifier = LogisticRegressionClassifier()
     lr_classifier.model = LogisticRegression(max_iter=10000)
     lr_classifier.train(df_train["utterance_content"], df_train["dialog_act"])
     evaluate_model(lr_classifier, df_test)
 
-    # logistic regression, deduplicated
-    lr_classifier_deduplicated = LogisticRegressionClassifier()
-    lr_classifier_deduplicated.name += " with deduplicated data"
-    lr_classifier_deduplicated.model = LogisticRegression(max_iter=10000)
-    lr_classifier_deduplicated.train(df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"])
-    evaluate_model(lr_classifier_deduplicated, df_test_deduplicated)
-
     model = None
-    ask_input = True
-    while ask_input:
+    while True:
         user_choice = input(
             "Please specify which model you want to test:\n\
         A: majority class baseline\n\
         B: rule-based baseline\n\
         C: decision tree classifier\n\
-        D: decision tree classifier with deduplicated data\n\
-        E: logistic regression classifier\n\
-        F: logistic regression classifier with deduplicated data\n>>" 
+        D: logistic regression classifier\n\
+        E: feed forward neural network ( work in progress)\n"
         ).upper()
         if user_choice == "A":
             model = majority_model
-            ask_input = False
         elif user_choice == "B":
             model = rule_model
-            ask_input = False
         elif user_choice == "C":
             model = dt_classifier
-            ask_input = False
-        elif user_choice == "D":
-            model = dt_classifier_deduplicated
-        elif user_choice == 'E':
+        elif user_choice == 'D':
             model = lr_classifier
-            ask_input = False
-        elif user_choice == "F":
-            model = lr_classifier_deduplicated
-            ask_input = False
-        else:
-            print("Please choose one of the listed options.\n>>")
+        elif user_choice == 'E':
+            print("This model has not been implemented as of yet, choose another option.")
             continue
+        else:
+            print("Wrong choice, choose another option.")
+            continue
+        break
     user_testing(model)
 
 
