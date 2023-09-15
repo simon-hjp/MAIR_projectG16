@@ -8,12 +8,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.tree import DecisionTreeClassifier
 
+
 ###
 ##### Data importing and preprocessing
 ###
 
 
-def import_data(data_dir: str):
+def import_data(data_dir: str, drop_duplicates=False):
     """Read data and return it as a dataframe.
 
     Parameters:
@@ -28,26 +29,13 @@ def import_data(data_dir: str):
         pat=" ", n=1, expand=True
     )
     df.drop("Datapoint", axis=1, inplace=True)
+    
+    if drop_duplicates:
+        df = df.drop_duplicates(keep='first', inplace=False, ignore_index=False)
+
     # create train- and test set
     df_train, df_test = train_test_split(df, test_size=0.15)
     return df_train, df_test
-
-def words_tokenizer(string):
-    return string.split()
-
-# def transform_data(df_train: pd.DataFrame, df_test: pd.DataFrame):
-#     """Transform utterance dataframe into machine-readable bag-of-words representation."""
-#     labelencoder = LabelEncoder()
-#     labelencoder.fit(df_train["dialog_act"])
-#     labelencoder.transform(df_train["dialog_act"])
-#     labelencoder.transform(df_test["dialog_act"])
-
-# def bag_of_words(df_train, df_test):
-#     """Transform text data into bag-of-words representation using TF-IDF."""
-#     vectorizer = TfidfVectorizer()
-#     X_train = vectorizer.fit_transform(df_train['utterance_content'])
-#     X_test = vectorizer.transform(df_test['utterance_content'])
-#     return X_train, X_test
 
 
 ###
@@ -161,11 +149,12 @@ class DecisionTreeActsClassifier:
         self.oov_token = 0  # Special integer for out-of-vocabulary words
     
     def train(self, X_train, y_train):
-        """Train the logistic regression model and the label encoder."""
+        """Fit the label encoder, the bag-of-words vectorizer and train the model."""
         self.label_encoder.fit(y_train)
         y_train_encoded = self.label_encoder.transform(y_train)
         self.vectorizer.fit(X_train)
         X_train_bow = self.vectorizer.transform(X_train)
+
         self.model.fit(X_train_bow, y_train_encoded)
     
     def predict(self, X_test):
@@ -294,7 +283,6 @@ def evaluate_model(model, df_test):
     print("\tPrecision score:", precision_score(y_test, y_hat, average="macro", zero_division=0),)
     print("\tF1 score:", f1_score(y_test, y_hat, average="macro"))
 
-
 ###
 ##### Program control flow
 ###
@@ -302,8 +290,7 @@ def evaluate_model(model, df_test):
 def run():
     """Test each model, report performance, and then initiate the command-line for the user."""
     df_train, df_test = import_data("dialog_acts.dat")
-    df_train_deduplicated = df_train.drop_duplicates(keep='first', ignore_index=False)
-    df_test_deduplicated = df_test.drop_duplicates(keep='first', ignore_index=False)
+    df_train_deduplicated, df_test_deduplicated = import_data("dialog_acts.dat", drop_duplicates=True)
 
     # majority baseline
     majority_model = MajorityBaselineClassifier()
