@@ -1,11 +1,12 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import precision_recall_fscore_support
 
 ###
 ##### Data importing and preprocessing
 ###
+
 
 def import_data(data_dir: str):
     """Read data and return it as a dataframe.
@@ -26,22 +27,55 @@ def import_data(data_dir: str):
     df_train, df_test = train_test_split(df, test_size=0.15)
     return df_train, df_test
 
+
 def transform_data(df_train: pd.DataFrame, df_test: pd.DataFrame):
-    """Transform utterance dataframe into machine-readable bag-of-words representation."""
-    labelencoder = LabelEncoder()
-    labelencoder.fit(df_train["dialog_act"])
-    labelencoder.transform(df_train["dialog_act"])
-    labelencoder.transform(df_test["dialog_act"])
-    # labelencoder
-    # bagofwords procedure
+    """Transform utterance dataframe into machine-readable bag-of-words representation with integer encoded labels."""
+    pass
+
 
 ###
 ##### Baseline classifiers
 ###
 
-class RuleBaselineClassifier():
-    """Baseline model that classifies utterances based on keywords.
-    """
+
+class MajorityBaselineClassifier:
+    """Baseline model for text classification that classifies every input as the most common class
+    in the dataset."""
+
+    def __init__(self) -> None:
+        self.name = "Majority baseline classifier"
+        self.prediction = ""
+
+    def fit_training_data(self, df_train):
+        """Find most common class and set it as the value to be predicted.
+
+        Parameters
+        - df_train: {pd.DataFrame} of shape (samples, features) containing dialog acts and utterances.
+
+        """
+        majority_class_label = df_train["dialog_act"].value_counts().idxmax()
+        self.prediction = majority_class_label
+
+    def predict_act(self, utterance):
+        """Return the dialog act found to be most common during training.
+
+        Parameters
+        - utterance: {string} sentence to be classified. Only included for consistency with other classifiers.
+
+        """
+        return self.prediction
+
+    def predict(self, X_test: pd.DataFrame):
+        """Return the prediction for each element in a test set."""
+        return [self.predict_act(element) for element in X_test]
+
+
+class RuleBaselineClassifier:
+    """Baseline model that classifies utterances based on keywords."""
+
+    def __init__(self) -> None:
+        self.name = "Rule-based baseline classifier"
+
     def utterance_contains_word(self, utterance, words):
         """Helper function to determine whether an utterance contains any word in a given list"""
         for word in words:
@@ -51,17 +85,24 @@ class RuleBaselineClassifier():
 
     def predict_act(self, utterance) -> str:
         """Predict the dialog act of utterances using a set of rules."""
-        if self.utterance_contains_word(utterance, ["food", "restaurant", "town", "east", "west", "south", "north", "part"]):
+        if self.utterance_contains_word(
+            utterance,
+            ["food", "restaurant", "town", "east", "west", "south", "north", "part"],
+        ):
             return "inform"
         elif "it" in utterance and "is" in utterance:
             return "confirm"
         elif self.utterance_contains_word(utterance, ["yes", "right"]):
             return "affirm"
-        elif self.utterance_contains_word(utterance, ["number", "phone", "address", "post"]):
+        elif self.utterance_contains_word(
+            utterance, ["number", "phone", "address", "post"]
+        ):
             return "request"
         elif "thank" in utterance and "you" in utterance:
             return "thankyou"
-        elif self.utterance_contains_word(utterance, ["noise", "sil", "unintelligible"]):
+        elif self.utterance_contains_word(
+            utterance, ["noise", "sil", "unintelligible"]
+        ):
             return "null"
         elif self.utterance_contains_word(utterance, ["good", "bye"]):
             return "bye"
@@ -84,80 +125,20 @@ class RuleBaselineClassifier():
         else:
             return "inform"  # Can replace this with 'error' later on if necessary for evaluation.
 
+    def predict(self, X_test: pd.DataFrame):
+        """Predict every utterance in a given dataframe of features."""
+        return [self.predict_act(element) for element in X_test]
 
-class MajorityBaselineClassifier:
-    """Baseline model for text classification that classifies every input as the most common class
-    in the dataset."""
-
-    def __init__(self) -> None:
-        self.prediction = ""
-
-    def fit_training_data(self, df_train):
-        """Find most common class and set it as the value to be predicted.
-
-        Parameters
-        - df_train: {pd.DataFrame} of shape (samples, features) containing dialog acts and utterances.
-
-        """
-        majority_class_label = df_train["dialog_act"].value_counts().idxmax()
-        self.prediction = majority_class_label
-
-    def predict_act(self, utterance):
-        """Return the dialog act found to be most common during training.
-
-        Parameters
-        - utterance: {string} sentence to be classified. Only included for consistency with other classifiers.
-
-        """
-        return self.prediction
 
 ###
 ##### Machine learning classifiers
 ###
 
 
+###
+##### Evaluation
+###
 
-def run():
-    """Test each model, report performance, and then initiate the command-line for the user.
-    """
-    df_train, df_test = import_data("dialog_acts.dat")
-    # majority baseline
-    majority_model = MajorityBaselineClassifier()
-    majority_model.fit_training_data(df_train)
-    evaluate_model(majority_model, df_test)
-
-    # rule-based baseline
-    rule_model = RuleBaselineClassifier()
-    evaluate_model(rule_model, df_test)
-
-    # decision tree
-    
-
-    # other ML algorithm
-
-    user_choice = input(
-        "Please specify which model you want to test:\n\
-            A: majority class baseline\n\
-            B: rule-based baseline\n\
-            C: machine-learning classifier 1\n\
-            D: machine-learning classifier 2\n"
-    ).upper()
-    model = None
-    if user_choice == "A":
-        model = majority_model
-    elif user_choice == "B":
-        model = rule_model
-    elif user_choice == "C":
-        print("Please choose another model, since this one has not been implemented\n")
-        run()
-    elif user_choice == "D":
-        print("Please choose another model, since this one has not been implemented\n")
-        run()
-    else:
-        print("Please choose one of the listed options.\n")
-        run()
-    user_testing(model)
-    return
 
 def user_testing(model):
     """Predict an utterance given by the user with a trained model.
@@ -182,7 +163,71 @@ def evaluate_model(model, df_test):
     - model: a trained dialog act classifier
     - df_test: {pd.DataFrame} containing pairs of dialog acts and utterances.
     """
-    pass
+    X_test = df_test["utterance_content"]
+    y_test = df_test["dialog_act"]
+    y_hat = model.predict(X_test)
+    print(f"{model.name} performance evaluation")
+    print("\tAccuracy score:", accuracy_score(y_test, y_hat))
+    print("\tRecall score:", recall_score(y_test, y_hat, average="macro"))
+    print(
+        "\tPrecision score:",
+        precision_score(y_test, y_hat, average="macro", zero_division=0),
+    )
+    print("\tF1 score:", f1_score(y_test, y_hat, average="macro"))
+
+
+###
+##### Program control flow
+###
+
+
+def run():
+    """Test each model, report performance, and then initiate the command-line for the user."""
+    df_train, df_test = import_data("dialog_acts.dat")
+
+    # majority baseline
+    majority_model = MajorityBaselineClassifier()
+    majority_model.fit_training_data(df_train)
+    evaluate_model(majority_model, df_test)
+
+    # rule-based baseline
+    rule_model = RuleBaselineClassifier()
+    evaluate_model(rule_model, df_test)
+
+    # decision tree
+
+    # other ML algorithm
+
+    model = None
+    ask_input = True
+    while ask_input:
+        user_choice = input(
+        "Please specify which model you want to test:\n\
+        A: majority class baseline\n\
+        B: rule-based baseline\n\
+        C: machine-learning classifier 1\n\
+        D: machine-learning classifier 2\n"
+        ).upper()
+        if user_choice == "A":
+            model = majority_model
+            ask_input = False
+        elif user_choice == "B":
+            model = rule_model
+            ask_input = False
+        elif user_choice == "C":
+            print(
+                "Please choose another model, since this one has not been implemented\n"
+            )
+            continue
+        elif user_choice == "D":
+            print(
+                "Please choose another model, since this one has not been implemented\n"
+            )
+            continue
+        else:
+            print("Please choose one of the listed options.\n")
+            continue
+    user_testing(model)
 
 
 if __name__ == "__main__":
