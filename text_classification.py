@@ -207,15 +207,10 @@ def evaluate_model(model, df_test):
     X_test = df_test["utterance_content"]
     y_test = df_test["dialog_act"]
 
-    if hasattr(model, "label_encoder"):
-        # Encode the ground truth labels using the model's label encoder
-        y_test = model.label_encoder.transform(y_test)
-
     y_hat = model.predict(X_test)
 
     if hasattr(model, "label_encoder"):
         y_hat = model.label_encoder.inverse_transform(y_hat)
-        y_test = model.label_encoder.inverse_transform(y_test)
 
     # calculate performance metrics
     print(f"{model.name} performance evaluation")
@@ -267,13 +262,13 @@ def run(data_dir="dialog_acts.dat"):
     # decision tree
     dt_params = {
         "criterion": ["gini", "entropy"],
-        "max_depth": [None, 10, 20, 30, 40],
-        "min_samples_split": [2, 4, 6, 8, 10],
-        "min_samples_leaf": [1, 2, 3, 4],
+        "max_depth": [None, 5, 10, 15, 20],
+        "min_samples_split": [2, 5, 10],
+        "min_samples_leaf": [1, 2, 4],
         "max_features": [None, "sqrt", "log2"],
         "class_weight": [None, "balanced"],
     }
-    
+
     dt_classifier = DialogActsClassifier(name="Decision tree classifier")
     dt_classifier.train(
         df_train["utterance_content"],
