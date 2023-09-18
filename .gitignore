@@ -2,3 +2,5 @@
 *.ipynb
 # Might be too large for git to handle
 *.dat
+# testing file for personal use aswell
+ingo_work.py

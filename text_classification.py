@@ -14,7 +14,13 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 
 ###
-##### Data importing and initial preprocessing
+
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+
+###
+## Data importing and initial preprocessing
 ###
 
 
@@ -195,7 +201,182 @@ class DialogActsClassifier:
 
         return average_vector
 
+class LogisticRegressionClassifier:
+    """Logistic Regression classifier for dialog act classification."""
 
+    def __init__(self):
+        self.name = "Logistic regression classifier"
+        self.model = LogisticRegression()
+        self.label_encoder = LabelEncoder()
+        self.vectorizer = TfidfVectorizer()
+        self.oov_token = 0  # Special integer for out-of-vocabulary words
+
+    def train(self, X_train, y_train):
+        """Train the logistic regression model and the label encoder."""
+        self.label_encoder.fit(y_train)
+        y_train_encoded = self.label_encoder.transform(y_train)
+        self.vectorizer.fit(X_train)
+        X_train_bow = self.vectorizer.transform(X_train)
+        self.model.fit(X_train_bow, y_train_encoded)
+
+    def predict(self, X_test):
+        """Predict dialog acts for test data."""
+        X_test_bow = [self.transform_input(utterance) for utterance in X_test]
+        X_test_bow = np.array(X_test_bow).reshape(len(X_test_bow), -1)
+        return self.model.predict(X_test_bow)
+
+    def predict_act(self, utterance):
+        """Predict the dialog act of an utterance."""
+        # Transform the utterance into a bag-of-words representation
+        utterance_bow = self.vectorizer.transform([utterance])
+
+        # Predict the dialog act using the trained logistic regression model
+        predicted_label_encoded = self.model.predict(utterance_bow)
+
+        # Decode the predicted label
+        predicted_label = self.label_encoder.inverse_transform(predicted_label_encoded)
+
+        return predicted_label[0] if len(predicted_label) > 0 else None
+
+    def transform_input(self, utterance: str):
+        """Transform the input utterance into a TF-IDF vector with OOV handling."""
+        # Transform the utterance into a bag-of-words representation
+
+        utterance_bow = TfidfVectorizer().transform([utterance])
+
+        # Calculate the average TF-IDF vector for the words in the utterance
+        if utterance_bow.nnz > 0:
+            average_vector = utterance_bow.sum(axis=0) / utterance_bow.nnz
+        else:
+            # Handle the case where there are no words in the utterance (empty string)
+            average_vector = np.zeros((1, len(self.vectorizer.get_feature_names_out())))
+
+        return average_vector
+
+
+class FeedForwardNeuralNetwork():
+    def __init__(self, name = "Feed-Forward Neural Network model"):
+        self.name = name
+        self.label_encoder = LabelEncoder()
+        self.vectorizer = TfidfVectorizer()
+        self.oov_token = 0  # Special integer for out-of-vocabulary words
+
+        self.model = keras.Sequential(
+            [
+                layers.Dense(20, activation="relu", name="layer1"),
+                layers.Dense(10, activation="tanh", name="layer4"),
+                layers.Dense(1, activation='softmax', name='custom_output_layer')
+            ]
+        )
+        self.loss_fn = keras.losses.CategoricalCrossentropy()
+        self.optimizer = keras.optimizers.Adam(learning_rate=0.1)
+
+        self.model.compile(loss=self.loss_fn, optimizer=self.optimizer)
+    def fit(self,x_train, y_train):
+        # Training loop
+
+        # Batch size for each training iteration
+        batch_size = 1
+
+        # find the size of the training data
+        training_length = x_train.shape[0]
+        # boolean to build the model on the first run
+        first = True
+
+        # change the csr_matrix into a regular matrix for our applications, and reshape it at the same time
+        x_train = [x_train[x, :].toarray().reshape(1, -1) for x in range(training_length)]
+
+        for batch_start in range(0, training_length, batch_size):
+            # current batch to train on
+            batch_x = x_train[batch_start: batch_start + batch_size]
+            batch_x = batch_x[0]
+            batch_y = y_train[batch_start: batch_start + batch_size]
+            if len(batch_x) < batch_size:
+                # if the batch is too big for the remainder of the training set, the training batch
+                # size does not handle modularity
+                continue
+
+            if first:
+                # build the neural-net on the batch ( this is not training)
+                self.model(batch_x)
+                print(self.model.summary())
+                first = False
+
+            # Compute gradients and update weights
+            with tf.GradientTape() as tape:
+                # this prediction is not doing anything
+                predictions = self.model(batch_x)
+                #-/-|-\-#
+                # attempt to reshape the y so that the datastructure is identical for the loss_value function
+                batch_y = tf.constant(batch_y)
+                batch_y = tf.transpose(batch_y)
+                batch_y = tf.expand_dims(batch_y, axis=1)
+                #-/-|-\-#
+                loss_value = self.loss_fn(batch_y, predictions[0])
+            # changes to parameters
+            gradients = tape.gradient(loss_value, self.model.trainable_weights)
+            # apply the changes
+            self.optimizer.apply_gradients(zip(gradients, self.model.trainable_weights))
+
+            # to see how the model is adapting, spaces are nice
+            # print("\n"*25)
+            print(f"run number:{batch_start}, loss_val:{loss_value}\nprediction:{predictions}, correct:{batch_y}")
+        # used for inspecting the code with breakpoints
+        pass
+
+    def predict(self, sentence):
+        return self.model(sentence)
+class FeedForwardNeuralNetworkClassifier:
+    """Logistic Regression classifier for dialog act classification."""
+
+    def __init__(self, name = "Feed-Forward Neural Network classifier"):
+        self.name = name
+        self.model = FeedForwardNeuralNetwork()
+        self.label_encoder = LabelEncoder()
+        self.vectorizer = TfidfVectorizer()
+        self.oov_token = 0  # Special integer for out-of-vocabulary words
+
+    def train(self, X_train, y_train):
+        """Train the Feed-Forward Neural Network model and the label encoder."""
+        self.label_encoder.fit(y_train)
+        y_train_encoded = self.label_encoder.transform(y_train)
+        self.vectorizer.fit(X_train)
+        X_train_bow = self.vectorizer.transform(X_train)
+        self.model.fit(X_train_bow, y_train_encoded)
+
+    def predict(self, X_test):
+        """Predict dialog acts for test data."""
+        X_test_bow = [self.transform_input(utterance) for utterance in X_test]
+        X_test_bow = np.array(X_test_bow).reshape(len(X_test_bow), -1)
+        return self.model.predict(X_test_bow)
+
+    def predict_act(self, utterance):
+        """Predict the dialog act of an utterance."""
+        # Transform the utterance into a bag-of-words representation
+        utterance_bow = self.vectorizer.transform([utterance])
+
+        # Predict the dialog act using the trained logistic regression model
+        predicted_label_encoded = self.model.predict(utterance_bow)
+
+        # Decode the predicted label
+        predicted_label = self.label_encoder.inverse_transform(predicted_label_encoded)
+
+        return predicted_label[0] if len(predicted_label) > 0 else None
+
+    def transform_input(self, utterance: str):
+        """Transform the input utterance into a TF-IDF vector with OOV handling."""
+        # Transform the utterance into a bag-of-words representation
+
+        utterance_bow = TfidfVectorizer().transform([utterance])
+
+        # Calculate the average TF-IDF vector for the words in the utterance
+        if utterance_bow.nnz > 0:
+            average_vector = utterance_bow.sum(axis=0) / utterance_bow.nnz
+        else:
+            # Handle the case where there are no words in the utterance (empty string)
+            average_vector = np.zeros((1, len(self.vectorizer.get_feature_names_out())))
+
+        return average_vector
 ###
 ##### Evaluation
 ###
@@ -250,6 +431,7 @@ def run(data_dir="dialog_acts.dat"):
     df_train, df_test = import_data(data_dir=data_dir, drop_duplicates=False)
     df_train_deduplicated, df_test_deduplicated = import_data(data_dir=data_dir, drop_duplicates=True)
 
+    """
     # majority baseline
     majority_model = MajorityBaselineClassifier()
     majority_model.train(df_train)
@@ -286,10 +468,9 @@ def run(data_dir="dialog_acts.dat"):
     )
     evaluate_model(dt_classifier_dd, df_test_deduplicated)
 
+
     # logistic regression
-    lr_classifier = DialogActsClassifier(
-        model=LogisticRegression(max_iter=10000), name="Logistic regression"
-    )
+    lr_classifier = DialogActsClassifier( model=LogisticRegression(max_iter=10000), name="Logistic regression")
     lr_classifier.train(df_train["utterance_content"], df_train["dialog_act"])
     evaluate_model(lr_classifier, df_test)
 
@@ -302,6 +483,16 @@ def run(data_dir="dialog_acts.dat"):
         df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"]
     )
     evaluate_model(lr_classifier_dd, df_test_deduplicated)
+    """
+    # Feed-Forward Neural Network
+    ffnn_classifier = FeedForwardNeuralNetworkClassifier(name="Feed-Forward Neural Network")
+    ffnn_classifier.train(df_train["utterance_content"], df_train["dialog_act"])
+    evaluate_model(ffnn_classifier, df_test)
+
+    # Feed-Forward Neural Network without duplicates
+    ffnn_classifier_dd = FeedForwardNeuralNetworkClassifier(name="Feed-Forward Neural Network without duplicates")
+    ffnn_classifier_dd.train(df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"])
+    evaluate_model(ffnn_classifier_dd, df_test_deduplicated)
 
     model = None
     while True:
