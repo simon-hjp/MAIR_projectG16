@@ -330,7 +330,7 @@ class FeedForwardNeuralNetwork():
     def predict(self, sentence):
         return self.model(sentence)
 class FeedForwardNeuralNetworkClassifier:
-    """Logistic Regression classifier for dialog act classification."""
+    """Feed-Forward Neural Network classifier for dialog act classification."""
 
     def __init__(self, name = "Feed-Forward Neural Network classifier"):
         self.name = name
