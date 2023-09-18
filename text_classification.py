@@ -411,7 +411,7 @@ def user_testing(model):
     while True:
         # user input sentence converted to lower case to prevent errors
         user_utterance = input(
-            "Please provide the sentence the model has to classify. \nTo exit the program, enter '1'.\n>>"
+            "Please provide the sentence the model has to classify. \nTo go back, enter '1'.\n>>"
         ).lower()
         if user_utterance == "1":
             break
@@ -424,7 +424,7 @@ def user_testing(model):
 ###
 
 
-def run(data_dir="dialog_acts.dat"):
+def create_models(data_dir):
     """Test each model, report performance, and then initiate the command-line for the user."""
 
     # Use this boolean to drop duplicate values from the data source
@@ -494,38 +494,38 @@ def run(data_dir="dialog_acts.dat"):
     ffnn_classifier_dd.train(df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"])
     evaluate_model(ffnn_classifier_dd, df_test_deduplicated)
 
-    model = None
+    # add all models to a dictionary and return it
+    models_dict = {
+        'A': majority_model,
+        'B': rule_model,
+        'C': dt_classifier,
+        'D': dt_classifier_dd,
+        'E': lr_classifier,
+        'F': lr_classifier_dd
+    }
+    return models_dict
+
+def command_line_testing(models_dict: dict):
+    """Let a user specify a model which they can then test."""
+    # create a string to show the model options
+    options = ''.join([key + ": " + models_dict[key].name + "\n\t" for key in models_dict])
+    # options = ''.join(options)
+    # let the user choose a model
     while True:
-        user_choice = input(
-            "Please specify which model you want to test:\n\
-        A: majority class baseline\n\
-        B: rule-based baseline\n\
-        C: decision tree classifier\n\
-        D: decision tree classifier with deduplicated data\n\
-        E: logistic regression classifier\n\
-        F: logistic regression classifier with deduplicated data\n\
-        1: quit the program.\n"
-        ).upper()
-        if user_choice == "A":
-            model = majority_model
-        elif user_choice == "B":
-            model = rule_model
-        elif user_choice == "C":
-            model = dt_classifier
-        elif user_choice == "D":
-            model = dt_classifier_dd
-        elif user_choice == "E":
-            model = lr_classifier
-        elif user_choice == "F":
-            model = lr_classifier_dd
-        elif user_choice == "1":
+        user_choice = input(f"Please specify which model you want to test:\n\t{options}1: quit the program.\n>>").upper()
+        if user_choice in models_dict:
+            user_testing(models_dict[user_choice])
+            continue
+        if user_choice == '1':
             return
         else:
             print("Wrong choice, choose another option.")
             continue
-        break
-    user_testing(model)
 
+def run(data_dir="dialog_acts.dat"):
+    """Train models and report their performance, then initiate the command line testing."""
+    trained_models = create_models(data_dir=data_dir)
+    command_line_testing(trained_models)
 
 if __name__ == "__main__":
     run(data_dir="dialog_acts.dat")
