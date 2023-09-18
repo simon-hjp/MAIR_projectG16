@@ -264,7 +264,10 @@ class FeedForwardNeuralNetwork():
         self.model = keras.Sequential(
             [
                 layers.Dense(20, activation="relu", name="layer1"),
+                #layers.Dense(20, activation="relu", name="layer2"),
+                #layers.Dense(20, activation="relu", name="layer3"),
                 layers.Dense(10, activation="tanh", name="layer4"),
+                #layers.Dense(10, activation="tanh", name="layer5"),
                 layers.Dense(1, activation='softmax', name='custom_output_layer')
             ]
         )
