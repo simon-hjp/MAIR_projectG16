@@ -272,7 +272,7 @@ class FeedForwardNeuralNetwork():
             ]
         )
         self.loss_fn = keras.losses.CategoricalCrossentropy()
-        self.optimizer = keras.optimizers.Adam(learning_rate=0.1)
+        self.optimizer = keras.optimizers.Adam(learning_rate=0.01)
 
         self.model.compile(loss=self.loss_fn, optimizer=self.optimizer)
     def fit(self,x_train, y_train):
@@ -498,6 +498,7 @@ def create_models(data_dir):
     evaluate_model(ffnn_classifier_dd, df_test_deduplicated)
 
     # add all models to a dictionary and return it
+
     models_dict = {
         'A': majority_model,
         'B': rule_model,
