@@ -271,7 +271,7 @@ class FeedForwardNeuralNetwork():
                 layers.Dense(30, activation="relu", name="layer4"),
                 layers.Dense(15, activation='softmax', name='custom_output_layer')
                 # if one-hot encoding
-                # layers.Dense(1, activation='softmax', name='custom_output_layer')
+                # layers.Dense(15, activation='softmax', name='custom_output_layer')
             ]
         )
         optimizer = keras.optimizers.Adam(learning_rate=0.001)
@@ -294,7 +294,7 @@ class FeedForwardNeuralNetwork():
 
         # Print the one-hot encoded labels
 
-        history = self.model.fit(x_train, y_train, epochs=15, batch_size=100, validation_split=0.2)
+        history = self.model.fit(x_train, y_train, epochs=5, batch_size=100, validation_split=0.2)
 
         # you can monitor the training progress and plot the learning curves
         plot_it = True
@@ -318,8 +318,8 @@ class FeedForwardNeuralNetwork():
             plt.legend(['Train', 'Validation'], loc='upper left')
             plt.show()
 
-    def predict(self, sentence):
-        return self.model(sentence)
+    def predict(self, sentences):
+        return self.model(sentences)
 class FeedForwardNeuralNetworkClassifier:
     """Feed-Forward Neural Network classifier for dialog act classification."""
 
@@ -340,9 +340,12 @@ class FeedForwardNeuralNetworkClassifier:
 
     def predict(self, X_test):
         """Predict dialog acts for test data."""
-        X_test_bow = [self.transform_input(utterance) for utterance in X_test]
+        X_test_bow = []
+        for utterance in X_test:
+            X_test_bow.append(self.transform_input(utterance))
         X_test_bow = np.array(X_test_bow).reshape(len(X_test_bow), -1)
-        return self.model.predict(X_test_bow)
+        prediction = self.model.predict(X_test_bow)
+        return prediction
 
     def predict_act(self, utterance):
         """Predict the dialog act of an utterance."""
@@ -361,7 +364,7 @@ class FeedForwardNeuralNetworkClassifier:
         """Transform the input utterance into a TF-IDF vector with OOV handling."""
         # Transform the utterance into a bag-of-words representation
 
-        utterance_bow = TfidfVectorizer().transform([utterance])
+        utterance_bow = self.vectorizer.transform([utterance])
 
         # Calculate the average TF-IDF vector for the words in the utterance
         if utterance_bow.nnz > 0:
@@ -371,6 +374,7 @@ class FeedForwardNeuralNetworkClassifier:
             average_vector = np.zeros((1, len(self.vectorizer.get_feature_names_out())))
 
         return average_vector
+
 ###
 ##### Evaluation
 ###
