@@ -15,9 +15,11 @@ from sklearn.model_selection import StratifiedKFold, GridSearchCV
 
 ###
 
-import tensorflow as tf
+import tensorflow
 from tensorflow import keras
 from tensorflow.keras import layers
+from tensorflow.keras.utils import to_categorical
+import matplotlib.pyplot as plt
 
 ###
 ## Data importing and initial preprocessing
@@ -263,69 +265,58 @@ class FeedForwardNeuralNetwork():
 
         self.model = keras.Sequential(
             [
-                layers.Dense(20, activation="relu", name="layer1"),
-                #layers.Dense(20, activation="relu", name="layer2"),
-                #layers.Dense(20, activation="relu", name="layer3"),
-                layers.Dense(10, activation="tanh", name="layer4"),
-                #layers.Dense(10, activation="tanh", name="layer5"),
-                layers.Dense(1, activation='softmax', name='custom_output_layer')
+                layers.Dense(240, activation="relu", name="layer1"),
+                layers.Dense(120, activation="relu", name="layer2"),
+                layers.Dense(60, activation="relu", name="layer3"),
+                layers.Dense(30, activation="relu", name="layer4"),
+                layers.Dense(15, activation='softmax', name='custom_output_layer')
+                # if one-hot encoding
+                # layers.Dense(1, activation='softmax', name='custom_output_layer')
             ]
         )
-        self.loss_fn = keras.losses.CategoricalCrossentropy()
-        self.optimizer = keras.optimizers.Adam(learning_rate=0.01)
+        optimizer = keras.optimizers.Adam(learning_rate=0.001)
 
-        self.model.compile(loss=self.loss_fn, optimizer=self.optimizer)
+        self.model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=['accuracy'])
+
     def fit(self,x_train, y_train):
-        # Training loop
-
-        # Batch size for each training iteration
-        batch_size = 1
-
-        # find the size of the training data
-        training_length = x_train.shape[0]
-        # boolean to build the model on the first run
-        first = True
-
         # change the csr_matrix into a regular matrix for our applications, and reshape it at the same time
-        x_train = [x_train[x, :].toarray().reshape(1, -1) for x in range(training_length)]
+        training_length = x_train.shape[0]
+        x_train = [x_train[x, :].toarray().reshape(1, -1)[0] for x in range(training_length)]
+        y_train = [[y_train[x]] for x in range(training_length)]
+        x_train = np.array(x_train)
+        y_train = np.array(y_train)
 
-        for batch_start in range(0, training_length, batch_size):
-            # current batch to train on
-            batch_x = x_train[batch_start: batch_start + batch_size]
-            batch_x = batch_x[0]
-            batch_y = y_train[batch_start: batch_start + batch_size]
-            if len(batch_x) < batch_size:
-                # if the batch is too big for the remainder of the training set, the training batch
-                # size does not handle modularity
-                continue
+        # Number of classes (in your case, 15)
+        num_classes = 15
 
-            if first:
-                # build the neural-net on the batch ( this is not training)
-                self.model(batch_x)
-                print(self.model.summary())
-                first = False
+        # Convert labels to one-hot encoding
+        y_train = to_categorical(y_train - 1, num_classes=num_classes)
 
-            # Compute gradients and update weights
-            with tf.GradientTape() as tape:
-                # this prediction is not doing anything
-                predictions = self.model(batch_x)
-                #-/-|-\-#
-                # attempt to reshape the y so that the datastructure is identical for the loss_value function
-                batch_y = tf.constant(batch_y)
-                batch_y = tf.transpose(batch_y)
-                batch_y = tf.expand_dims(batch_y, axis=1)
-                #-/-|-\-#
-                loss_value = self.loss_fn(batch_y, predictions[0])
-            # changes to parameters
-            gradients = tape.gradient(loss_value, self.model.trainable_weights)
-            # apply the changes
-            self.optimizer.apply_gradients(zip(gradients, self.model.trainable_weights))
+        # Print the one-hot encoded labels
 
-            # to see how the model is adapting, spaces are nice
-            # print("\n"*25)
-            print(f"run number:{batch_start}, loss_val:{loss_value}\nprediction:{predictions}, correct:{batch_y}")
-        # used for inspecting the code with breakpoints
-        pass
+        history = self.model.fit(x_train, y_train, epochs=100, batch_size=100, validation_split=0.2)
+
+        # you can monitor the training progress and plot the learning curves
+        plot_it = True
+        if plot_it:
+
+            # Plot training & validation accuracy values
+            plt.plot(history.history['accuracy'])
+            plt.plot(history.history['val_accuracy'])
+            plt.title('Model accuracy')
+            plt.xlabel('Epoch')
+            plt.ylabel('Accuracy')
+            plt.legend(['Train', 'Validation'], loc='upper left')
+            plt.show()
+
+            # Plot training & validation loss values
+            plt.plot(history.history['loss'])
+            plt.plot(history.history['val_loss'])
+            plt.title('Model loss')
+            plt.xlabel('Epoch')
+            plt.ylabel('Loss')
+            plt.legend(['Train', 'Validation'], loc='upper left')
+            plt.show()
 
     def predict(self, sentence):
         return self.model(sentence)
