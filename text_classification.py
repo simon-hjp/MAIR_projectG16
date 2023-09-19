@@ -294,7 +294,7 @@ class FeedForwardNeuralNetwork():
 
         # Print the one-hot encoded labels
 
-        history = self.model.fit(x_train, y_train, epochs=100, batch_size=100, validation_split=0.2)
+        history = self.model.fit(x_train, y_train, epochs=15, batch_size=100, validation_split=0.2)
 
         # you can monitor the training progress and plot the learning curves
         plot_it = True
