@@ -15,11 +15,11 @@ from sklearn.model_selection import StratifiedKFold, GridSearchCV
 
 ###
 
-import tensorflow
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.utils import to_categorical
 import matplotlib.pyplot as plt
+import torch
 
 ###
 ## Data importing and initial preprocessing
@@ -263,26 +263,27 @@ class FeedForwardNeuralNetwork():
         self.vectorizer = TfidfVectorizer()
         self.oov_token = 0  # Special integer for out-of-vocabulary words
 
+        self.training_length = 0
         self.model = keras.Sequential(
             [
                 layers.Dense(240, activation="relu", name="layer1"),
                 layers.Dense(120, activation="relu", name="layer2"),
-                layers.Dense(60, activation="relu", name="layer3"),
-                layers.Dense(30, activation="relu", name="layer4"),
+                layers.Dense(60, activation="relu", name="layer4"),
+                layers.Dense(30, activation="relu", name="layer6"),
                 layers.Dense(15, activation='softmax', name='custom_output_layer')
                 # if one-hot encoding
                 # layers.Dense(15, activation='softmax', name='custom_output_layer')
             ]
         )
-        optimizer = keras.optimizers.Adam(learning_rate=0.001)
+        optimizer = keras.optimizers.Adam(learning_rate=0.01)
 
         self.model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=['accuracy'])
 
     def fit(self,x_train, y_train):
         # change the csr_matrix into a regular matrix for our applications, and reshape it at the same time
-        training_length = x_train.shape[0]
-        x_train = [x_train[x, :].toarray().reshape(1, -1)[0] for x in range(training_length)]
-        y_train = [[y_train[x]] for x in range(training_length)]
+        self.training_length = x_train.shape[0]
+        x_train = [x_train[x, :].toarray().reshape(1, -1)[0] for x in range(self.training_length)]
+        y_train = [[y_train[x]] for x in range(self.training_length)]
         x_train = np.array(x_train)
         y_train = np.array(y_train)
 
@@ -290,14 +291,14 @@ class FeedForwardNeuralNetwork():
         num_classes = 15
 
         # Convert labels to one-hot encoding
-        y_train = to_categorical(y_train - 1, num_classes=num_classes)
+        y_train = to_categorical(y_train, num_classes=num_classes)
 
         # Print the one-hot encoded labels
 
-        history = self.model.fit(x_train, y_train, epochs=5, batch_size=100, validation_split=0.2)
+        history = self.model.fit(x_train, y_train, epochs=5, batch_size=100, validation_split=0.1, shuffle=True)
 
         # you can monitor the training progress and plot the learning curves
-        plot_it = True
+        plot_it = False
         if plot_it:
 
             # Plot training & validation accuracy values
@@ -388,9 +389,13 @@ def evaluate_model(model, df_test):
 
     y_hat = model.predict(X_test)
 
-    if hasattr(model, "label_encoder"):
+    if hasattr(model, "label_encoder") and not isinstance(model,FeedForwardNeuralNetworkClassifier):
         y_hat = model.label_encoder.inverse_transform(y_hat)
-
+    elif isinstance(model,FeedForwardNeuralNetworkClassifier):
+        # convert the model guess to a label for the classification report
+        y_hat = y_hat.numpy()
+        y_hat = np.argmax(y_hat, axis=1)
+        y_hat = model.label_encoder.inverse_transform(y_hat)
     # calculate performance metrics
     print(f"{model.name} performance evaluation")
     model_performance = classification_report(y_test, y_hat, output_dict=True, zero_division=0)
@@ -429,7 +434,7 @@ def create_models(data_dir):
     df_train, df_test = import_data(data_dir=data_dir, drop_duplicates=False)
     df_train_deduplicated, df_test_deduplicated = import_data(data_dir=data_dir, drop_duplicates=True)
 
-    """
+
     # majority baseline
     majority_model = MajorityBaselineClassifier()
     majority_model.train(df_train)
@@ -481,7 +486,7 @@ def create_models(data_dir):
         df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"]
     )
     evaluate_model(lr_classifier_dd, df_test_deduplicated)
-    """
+
     # Feed-Forward Neural Network
     ffnn_classifier = FeedForwardNeuralNetworkClassifier(name="Feed-Forward Neural Network")
     ffnn_classifier.train(df_train["utterance_content"], df_train["dialog_act"])
@@ -500,7 +505,9 @@ def create_models(data_dir):
         'C': dt_classifier,
         'D': dt_classifier_dd,
         'E': lr_classifier,
-        'F': lr_classifier_dd
+        'F': lr_classifier_dd,
+        'G': ffnn_classifier,
+        'H': ffnn_classifier_dd
     }
     return models_dict
 
