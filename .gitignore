@@ -4,3 +4,5 @@
 *.dat
 # testing file for personal use aswell
 ingo_work.py
+# Vscode auto-generated configurations
+.vscode/
