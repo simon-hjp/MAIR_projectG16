@@ -294,8 +294,8 @@ class FeedForwardNeuralNetwork():
         y_train = to_categorical(y_train, num_classes=num_classes)
 
         # Print the training of the model, 0 = nothing printed, 1 = training progress bar, 2 = one line per epoch
-        print_training = 0
-        history = self.model.fit(x_train, y_train, epochs=5, batch_size=100, validation_split=0.1
+        print_training = 1
+        history = self.model.fit(x_train, y_train, epochs=7, batch_size=400, validation_split=0.2
                                  , shuffle=True, verbose=print_training)
         # monitoring the training progress and plotting the learning curves
         plot_it = False
@@ -433,7 +433,6 @@ def create_models(data_dir):
     # Use this boolean to drop duplicate values from the data source
     df_train, df_test = import_data(data_dir=data_dir, drop_duplicates=False)
     df_train_deduplicated, df_test_deduplicated = import_data(data_dir=data_dir, drop_duplicates=True)
-
 
     # majority baseline
     majority_model = MajorityBaselineClassifier()
