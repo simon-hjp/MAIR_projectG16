@@ -1,7 +1,7 @@
 ######
 ###     Methods in AI research: part 1a
 ###     Group 16
-######
+###
 
 import pandas as pd
 import numpy as np
@@ -12,14 +12,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
+from tensorflow import keras
+from keras import layers
+from keras.utils import to_categorical
+import matplotlib.pyplot as plt
 
 ###
 
-from tensorflow import keras
-from tensorflow.keras import layers
-from tensorflow.keras.utils import to_categorical
-import matplotlib.pyplot as plt
-import torch
 
 ###
 ## Data importing and initial preprocessing
