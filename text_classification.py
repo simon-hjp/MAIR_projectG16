@@ -287,17 +287,17 @@ class FeedForwardNeuralNetwork():
         x_train = np.array(x_train)
         y_train = np.array(y_train)
 
-        # Number of classes (in your case, 15)
+        # Number of classes (in our case, 15)
         num_classes = 15
 
         # Convert labels to one-hot encoding
         y_train = to_categorical(y_train, num_classes=num_classes)
 
-        # Print the one-hot encoded labels
-
-        history = self.model.fit(x_train, y_train, epochs=5, batch_size=100, validation_split=0.1, shuffle=True)
-
-        # you can monitor the training progress and plot the learning curves
+        # Print the training of the model, 0 = nothing printed, 1 = training progress bar, 2 = one line per epoch
+        print_training = 0
+        history = self.model.fit(x_train, y_train, epochs=5, batch_size=100, validation_split=0.1
+                                 , shuffle=True, verbose=print_training)
+        # monitoring the training progress and plotting the learning curves
         plot_it = False
         if plot_it:
 
