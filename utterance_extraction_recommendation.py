@@ -1,16 +1,12 @@
-import csv
 import pandas as pd
 
-def info_in_utterance(utterance, csv_file):
+def info_in_utterance(utterance, df):
     # Initialize variables
     area = ""
     food = ""
     pricerange = ""
 
     # Looking for food
-    # Choose the separation symbol
-    df = pd.read_csv(csv_file, sep=';')
-
     # Extract values from the 4th column
     foods_in_column_4 = df.iloc[:, 3]
 
@@ -24,7 +20,6 @@ def info_in_utterance(utterance, csv_file):
             break
 
     # Check if the utterance contains words related to area (north, west, east, south)
-
     area_words = ["north", "west", "east", "south"]
     for word in area_words:
         if word in utterance:
@@ -45,24 +40,56 @@ def info_in_utterance(utterance, csv_file):
     # Check if the utterance contains words related to pricerange (cheap, moderate, expensive)
     for cheap_words in cheap:
         if cheap_words in utterance:
-            pricerange = cheap
+            pricerange = 'cheap'
             print(f'pricerange: {pricerange}')
             break
+    
     for moderate_words in moderate:
         if moderate_words in utterance:
             pricerange = 'moderate'
             print(f'pricerange: {pricerange}')
             break
+    
     for expensive_words in expensive:
         if expensive_words in utterance:
             pricerange = 'expensive'
             print(f'pricerange: {pricerange}')
             break
+    
+    return {'food': food, 'area': area, 'pricerange': pricerange}
+
+def provide_recommendations(restaurants_df: pd.DataFrame, req_food="", req_pricerange="", req_area="") -> str:
+    """Return a restaurant recommendation based on the requested attributes by the user.
+    """
+    possible_recs = restaurants_df.copy()
+    if req_food != "":
+        possible_recs = possible_recs[possible_recs["food"]==req_food]
+    if req_pricerange != "":
+        possible_recs = possible_recs[possible_recs["pricerange"]==req_pricerange]
+    if req_area != "":
+        possible_recs = possible_recs[possible_recs["area"]==req_area]
+    
+    if len(possible_recs) < 1:
+        return "No restaurant"
+    return possible_recs["restaurantname"].sample(n=1, random_state=5).iloc[0]
+
+def get_restaurant_info(restaurants_df: pd.DataFrame, restaurantname: str):
+    """Given a restaurant name, return its information as a dictionary.
+
+    Returns: dictionary with keys 'restaurantname', 'area', 'pricerange', 'food', 'phone', 'addr', 'postcode'.
+    """
+    if restaurantname not in restaurants_df["restaurantname"].to_list():
+        return "Not found"
+    return restaurants_df[restaurants_df["restaurantname"]==restaurantname].to_dict(orient='records')[0]
+
+restaurant_data = pd.read_csv('Data/restaurant_info.csv')
 
 while True:
-    csv_file = '/Users/berkeyazan/Desktop/restaurant_info.csv'
     utterance = input("Hello, how can I help you?\nYour utterance ('1' to quit): ").lower()
     if utterance == '1':
         break
-
-    info_in_utterance(utterance, csv_file)
+    
+    info_dict = info_in_utterance(utterance, restaurant_data)
+    recommendation = provide_recommendations(restaurants_df=restaurant_data, req_food=info_dict["food"], req_area=info_dict["area"], req_pricerange=info_dict["pricerange"])
+    print("Recommended restaurant:", recommendation)
+    print("Recommendation info:", get_restaurant_info(restaurant_data, recommendation))
