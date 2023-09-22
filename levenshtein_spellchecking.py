@@ -26,7 +26,7 @@ def food_spellcheck(food, threshold=2):
 
 # Spellchecking for area
 def area_spellcheck(area, threshold=2):
-    known_areas = ["north", "west", "east", "south"]
+    known_areas = ["north", "west", "east", "south","centre"]
     closest_area = None
     min_distance = threshold
 
