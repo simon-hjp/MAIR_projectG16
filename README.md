@@ -25,7 +25,7 @@ We will model a specific knowledge domain related to restaurant recommendations,
 We'll implement and empirically evaluate a machine learning classifier for natural language processing (NLP). This will enable our system to understand and interpret user queries effectively and with relatively high precision.
 
 - **Dialog System Application**: 
-Using the dialog model and NLP classifier, we'll develop a text-based dialog system application. Users will interact with our system to receive restaurant recommendations.
+Using the dialog model and classifiers, we'll develop a text-based dialog system application. Users will interact with our system to receive restaurant recommendations.
 
 **Part 2**:
 Has not started yet.
@@ -38,6 +38,7 @@ Make sure you have Python installed on your system before running this command.
 This command automatically installs the required libraries on your machine.
 
 <h2>Usage</h2>
+Run main.py to execute the finite-state Machine of part 1.b, run text_classification.py for part 1.a.
 
 *We need to explain how users can use our project effectively. Provide examples and instructions as needed.*
 
