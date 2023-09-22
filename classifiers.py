@@ -116,11 +116,11 @@ class DialogActsClassifier:
 
         # fit bag-of-words vectorizer and transform features
         vectorizer.fit(x_train)
-        X_train_bow = vectorizer.transform(x_train)
+        x_train_bow = vectorizer.transform(x_train)
 
         # if a hyperparameter grid is specified, perform a grid search
         if hyperparams_dict is None:
-            self.model.fit(X_train_bow, y_train_encoded)
+            self.model.fit(x_train_bow, y_train_encoded)
         else:
             print(f"Performing grid search for {self.name}")
             cv = StratifiedKFold(n_splits=3)
@@ -131,14 +131,14 @@ class DialogActsClassifier:
                 param_grid=hyperparams_dict,
                 n_jobs=-1,
             )
-            gridsearch.fit(X_train_bow, y_train_encoded)
+            gridsearch.fit(x_train_bow, y_train_encoded)
             self.model = gridsearch.best_estimator_
 
     def predict(self, x_test):
         """Predict dialog acts for test data."""
-        X_test_bow = [self.transform_input(utterance) for utterance in x_test]
-        X_test_bow = np.array(X_test_bow).reshape(len(X_test_bow), -1)
-        return self.model.predict(X_test_bow)
+        x_test_bow = [self.transform_input(utterance) for utterance in x_test]
+        x_test_bow = np.array(x_test_bow).reshape(len(x_test_bow), -1)
+        return self.model.predict(x_test_bow)
 
     def predict_act(self, utterance):
         """Predict the dialog act of an utterance."""
@@ -174,13 +174,13 @@ class LogisticRegressionClassifier:
         self.model = LogisticRegression()
         self.oov_token = 0  # Special integer for out-of-vocabulary words
 
-    def train(self, X_train, y_train):
+    def train(self, x_train, y_train):
         """Train the logistic regression model and the label encoder."""
         label_encoder.fit(y_train)
         y_train_encoded = label_encoder.transform(y_train)
-        vectorizer.fit(X_train)
-        X_train_bow = vectorizer.transform(X_train)
-        self.model.fit(X_train_bow, y_train_encoded)
+        vectorizer.fit(x_train)
+        x_train_bow = vectorizer.transform(x_train)
+        self.model.fit(x_train_bow, y_train_encoded)
 
     def predict(self, x_test):
         """Predict dialog acts for test data."""
