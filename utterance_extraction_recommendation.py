@@ -1,5 +1,4 @@
 import pandas as pd
-# from levenshtein_spellchecking import food_spellcheck, area_spellcheck, pricerange_spellcheck
 
 def info_in_utterance(utterance: str, df: pd.DataFrame):
     # Initialize variables
@@ -60,7 +59,7 @@ def info_in_utterance(utterance: str, df: pd.DataFrame):
     
     return {'food': food, 'area': area, 'pricerange': pricerange}
 
-def provide_recommendations(restaurants_df: pd.DataFrame, req_food="", req_pricerange="", req_area="") -> str:
+def provide_recommendations(restaurants_df: pd.DataFrame, req_food="", req_pricerange="", req_area="") -> tuple[str, pd.DataFrame]:
     """Return a restaurant recommendation based on the requested attributes by the user.
     """
     possible_recs = restaurants_df.copy()
@@ -72,8 +71,8 @@ def provide_recommendations(restaurants_df: pd.DataFrame, req_food="", req_price
         possible_recs = possible_recs[possible_recs["area"]==req_area]
     
     if len(possible_recs) < 1:
-        return "No restaurant"
-    return possible_recs["restaurantname"].sample(n=1, random_state=5).iloc[0]
+        return "No restaurant", possible_recs
+    return possible_recs["restaurantname"].sample(n=1, random_state=5).iloc[0], possible_recs
 
 def get_restaurant_info(restaurants_df: pd.DataFrame, restaurantname: str):
     """Given a restaurant name, return its information as a dictionary.
@@ -87,13 +86,13 @@ def get_restaurant_info(restaurants_df: pd.DataFrame, restaurantname: str):
 
 def test_uer():
     restaurant_data = pd.read_csv('Data/restaurant_info.csv')
-    
+
     while True:
         utterance = input("Hello, how can I help you?\nYour utterance ('1' to quit): ").lower()
         if utterance == '1':
             break
         
         info_dict = info_in_utterance(utterance, restaurant_data)
-        recommendation = provide_recommendations(restaurants_df=restaurant_data, req_food=info_dict["food"], req_area=info_dict["area"], req_pricerange=info_dict["pricerange"])
+        recommendation, alternatives = provide_recommendations(restaurants_df=restaurant_data, req_food=info_dict["food"], req_area=info_dict["area"], req_pricerange=info_dict["pricerange"])
         print("Recommended restaurant:", recommendation)
         print("Recommendation info:", get_restaurant_info(restaurant_data, recommendation))
