@@ -1,6 +1,4 @@
 import numpy as np
-from sklearn.preprocessing import LabelEncoder
-from sklearn.feature_extraction.text import TfidfVectorizer
 from tensorflow import keras
 from keras import layers
 from keras.utils import to_categorical
@@ -14,17 +12,14 @@ import text_classification as tc
 class FeedForwardNeuralNetwork():
     def __init__(self, name = "Feed-Forward Neural Network model"):
         self.name = name
-        self.label_encoder = LabelEncoder()
-        self.vectorizer = TfidfVectorizer()
         self.oov_token = 0  # Special integer for out-of-vocabulary words
-
         self.training_length = 0
         self.model = keras.Sequential(
             [
                 layers.Dense(240, activation="relu", name="layer1"),
                 layers.Dense(120, activation="relu", name="layer2"),
-                layers.Dense(60, activation="relu", name="layer4"),
-                layers.Dense(30, activation="relu", name="layer6"),
+                layers.Dense(60, activation="relu", name="layer3"),
+                layers.Dense(30, activation="relu", name="layer4"),
                 layers.Dense(15, activation='softmax', name='custom_output_layer')
             ]
         )
@@ -96,6 +91,10 @@ def create_models(data_dir):
     df_train, df_test = tc.import_data(data_dir=data_dir, drop_duplicates=False)
     df_train_deduplicated, df_test_deduplicated = tc.import_data(data_dir=data_dir, drop_duplicates=True)
 
+    cl.label_encoder.fit(df_train["dialog_act"])
+    cl.vectorizer.fit(df_train["utterance_content"])
+
+
     # majority baseline
     majority_model = cl.MajorityBaselineClassifier()
     majority_model.train(df_train)
@@ -105,7 +104,6 @@ def create_models(data_dir):
     rule_model = cl.RuleBaselineClassifier()
     tc.evaluate_model(rule_model, df_test)
 
-    
     # decision tree
     dt_params = {
         "criterion": ["gini", "entropy"],
@@ -132,7 +130,6 @@ def create_models(data_dir):
         hyperparams_dict=dt_params,
     )
     tc.evaluate_model(dt_classifier_dd, df_test_deduplicated)
-    
 
     # logistic regression
     lr_classifier = cl.DialogActsClassifier( model=cl.LogisticRegression(max_iter=10000), name="Logistic regression")
