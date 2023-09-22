@@ -259,8 +259,10 @@ class FiniteStateMachine:
                     self.add_speech("I'm sorry, human. I did not find another restaurant which matches the given requirements. I will now terminate.")
                     self.set_state(10)
                     return
-                self._probable_restaurant = self._possible_recommendations.sample(n=1)
-                self._possible_recommendations.drop(self._probable_restaurant.index)
+                tmp = self._possible_recommendations.sample(n=1)
+                self._probable_restaurant = tmp["restaurantname"].iloc[0]
+                self._possible_recommendations.drop(tmp.index)
+                self.add_speech("I have found another restaurant that matches your requirements human! It is the '{}' restaurant. Would you like more information about this restaurant? Or am I done?".format(self._probable_restaurant))
                 self.set_state(9)
                 return
             else:
