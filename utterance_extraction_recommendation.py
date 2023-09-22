@@ -67,10 +67,10 @@ def provide_recommendations(restaurants_df: pd.DataFrame, req_food="", req_price
         possible_recs = possible_recs[possible_recs["pricerange"]==req_pricerange]
     if req_area != "":
         possible_recs = possible_recs[possible_recs["area"]==req_area]
-    
+    print(possible_recs)
     if len(possible_recs) < 1:
         return "No restaurant", possible_recs
-    recommendation = possible_recs.sample(n=1, random_state=5).iloc[0]
+    recommendation = possible_recs.sample(n=1, random_state=5)
     possible_recs.drop(recommendation.index, inplace=True)
     return recommendation["restaurantname"].iloc[0], possible_recs
 
