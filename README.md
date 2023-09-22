@@ -39,11 +39,12 @@ This command automatically installs the required libraries on your machine.
 
 <h2>Usage</h2>
 
-Describe how users can use your project effectively. Provide examples and instructions as needed.
+*We need to explain how users can use our project effectively. Provide examples and instructions as needed.*
 
 <h2>Libraries</h2>
 
-The project relies on several Python libraries to achieve its functionality. Here are the key libraries used in this project:
+The project relies on several Python libraries to achieve its functionality. 
+Here are all the libraries used in this project:
 
 - **pandas**: 
 Pandas is a powerful data manipulation and analysis library that simplifies working with structured data.
@@ -64,6 +65,4 @@ Please refer to the documentation of each library for more details on their usag
 
 <h2>License</h2>
 
-This project is licensed under the MIT License. You can find the full license details in the LICENSE file.
-
-Feel free to customize the descriptions and explanations as needed for your project. Including information about the libraries you're using in your README helps users understand the technology stack behind your project and the tools they might need to work with it.
+*We need to add a License to our project*
