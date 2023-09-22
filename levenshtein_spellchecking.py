@@ -5,10 +5,9 @@ from Levenshtein import distance
 # Reading the csv
 csv_file = 'Data/restaurant_info.csv'
 df = pd.read_csv(csv_file, sep=',')
-print()
 
 # Spellchecking for food
-def food_spellcheck(food, threshold=2):
+def food_spellcheck(food, threshold=3):
     # Get unique values from the column and convert them to a list
     unique_foods_list = df['food'].unique().tolist()
 
@@ -25,7 +24,7 @@ def food_spellcheck(food, threshold=2):
     return closest_food
 
 # Spellchecking for area
-def area_spellcheck(area, threshold=2):
+def area_spellcheck(area, threshold=3):
     known_areas = ["north", "west", "east", "south", "centre"]
     closest_area = None
     min_distance = threshold
@@ -39,7 +38,7 @@ def area_spellcheck(area, threshold=2):
     return closest_area
 
 # Spellchecking for pricerange
-def pricerange_spellcheck(pricerange, threshold=2):
+def pricerange_spellcheck(pricerange, threshold=3):
     closest_pricerange = None
     min_distance = threshold
     known_priceranges = ["budget-friendly", "cheap", "affordable", "economical",
