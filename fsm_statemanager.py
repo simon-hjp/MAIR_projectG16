@@ -227,7 +227,7 @@ class FiniteStateMachine:
                 self._possible_recommendations = rest_df
                 if rec != "No restaurant":  # Found a restaurant!
                     self._probable_restaurant = rec
-                    self.add_speech("I have found a restaurant that matches your requirements human! It is the '{}' restaurant. Would you like more information, or is my function hereby fulfilled?".format(self._probable_restaurant))
+                    self.add_speech("I have found a restaurant that matches your requirements human! It is the '{}' restaurant. Would you like more information?".format(self._probable_restaurant))
                     self.set_state(9)
                     return
                 elif rec == "No restaurant":  # Didn't find a restaurant
