@@ -1,6 +1,6 @@
 ####
-##     Methods in AI research: part 1a
-##     Group 16
+#     Methods in AI research: part 1b
+#     Group 16
 ####
 
 import pandas as pd
@@ -12,8 +12,9 @@ from sklearn.metrics import classification_report
 import models
 import classifiers as cl
 
+
 ###
-## Data importing and initial preprocessing
+# Data importing and initial preprocessing
 ###
 
 def import_data(data_dir: str, drop_duplicates=False):
@@ -35,19 +36,20 @@ def import_data(data_dir: str, drop_duplicates=False):
     df_train, df_test = train_test_split(df, test_size=0.15)
     return df_train, df_test
 
+
 ###
-##### Evaluation
+# Evaluation
 ###
 
 def evaluate_model(model, df_test):
     """Evaluate the performance of a trained model on the test dataset.
     """
-    X_test = df_test["utterance_content"]
+    x_test = df_test["utterance_content"]
     y_test = df_test["dialog_act"]
 
-    y_hat = model.predict(X_test)
+    y_hat = model.predict(x_test)
 
-    if not( model.name == "Majority baseline classifier" or model.name == "Rule-based baseline classifier"):
+    if not (model.name == "Majority baseline classifier" or model.name == "Rule-based baseline classifier"):
         y_hat = cl.label_encoder.inverse_transform(y_hat)
     # calculate performance metrics
     print(f"{model.name} performance evaluation")
@@ -58,6 +60,7 @@ def evaluate_model(model, df_test):
     model_performance.drop("support", axis=1, inplace=True)
     model_performance.index.name = "Dialog act"
     print(model_performance)
+
 
 def user_testing(model):
     """Predict an utterance given by the user with a trained model.
@@ -85,7 +88,8 @@ def command_line_testing(models_dict: dict):
     # options = ''.join(options)
     # let the user choose a model
     while True:
-        user_choice = input(f"Please specify which model you want to test:\n\t{options}1: quit the program.\n>>").upper()
+        user_choice = input(
+            f"Please specify which model you want to test:\n\t{options}1: quit the program.\n>>").upper()
         if user_choice in models_dict:
             user_testing(models_dict[user_choice])
             continue
@@ -95,11 +99,13 @@ def command_line_testing(models_dict: dict):
             print("Wrong choice, choose another option.")
             continue
 
+
 def run(data_dir="Data\\dialog_acts.dat"):
     """Train models and report their performance, then initiate the command line testing."""
 
     trained_models = models.create_models(data_dir=data_dir)
     command_line_testing(trained_models)
+
 
 if __name__ == "__main__":
     run(data_dir="dialog_acts.dat")

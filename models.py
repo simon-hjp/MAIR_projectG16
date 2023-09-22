@@ -1,16 +1,21 @@
+####
+#     Methods in AI research: part 1b
+#     Group 16
+####
+
 import numpy as np
 from tensorflow import keras
 from keras import layers
 from keras.utils import to_categorical
 import matplotlib.pyplot as plt
 
-### our code
-
+# our code
 import classifiers as cl
 import text_classification as tc
 
-class FeedForwardNeuralNetwork():
-    def __init__(self, name = "Feed-Forward Neural Network model"):
+
+class FeedForwardNeuralNetwork:
+    def __init__(self, name="Feed-Forward Neural Network model"):
         self.name = name
         self.oov_token = 0  # Special integer for out-of-vocabulary words
         self.training_length = 0
@@ -24,8 +29,8 @@ class FeedForwardNeuralNetwork():
             ]
         )
         optimizer = keras.optimizers.Adam(learning_rate=0.01)
-
         self.model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=['accuracy'])
+
     def reshape_x(self, x_data):
         # change the csr_matrix into a regular matrix for our applications, and reshape it at the same time
         self.training_length = x_data.shape[0]
@@ -53,7 +58,6 @@ class FeedForwardNeuralNetwork():
         # monitoring the training progress and plotting the learning curves
         plot_it = False
         if plot_it:
-
             # Plot training & validation accuracy values
             plt.plot(history.history['accuracy'])
             plt.plot(history.history['val_accuracy'])
@@ -83,7 +87,6 @@ class FeedForwardNeuralNetwork():
         return prediction
 
 
-
 def create_models(data_dir):
     """Test each model, report performance, and then initiate the command-line for the user."""
 
@@ -91,9 +94,9 @@ def create_models(data_dir):
     df_train, df_test = tc.import_data(data_dir=data_dir, drop_duplicates=False)
     df_train_deduplicated, df_test_deduplicated = tc.import_data(data_dir=data_dir, drop_duplicates=True)
 
+    # train the global label encoder and vectorizer
     cl.label_encoder.fit(df_train["dialog_act"])
     cl.vectorizer.fit(df_train["utterance_content"])
-
 
     # majority baseline
     majority_model = cl.MajorityBaselineClassifier()
@@ -113,37 +116,26 @@ def create_models(data_dir):
         "max_features": [None, "sqrt", "log2"],
         "class_weight": [None, "balanced"],
     }
-    
+
     dt_classifier = cl.DialogActsClassifier(name="Decision tree classifier")
-    dt_classifier.train(
-        df_train["utterance_content"],
-        df_train["dialog_act"],
-        hyperparams_dict=dt_params,
-    )
+    dt_classifier.train(df_train["utterance_content"], df_train["dialog_act"], hyperparams_dict=dt_params)
     tc.evaluate_model(dt_classifier, df_test)
 
     # decision tree without duplicates
     dt_classifier_dd = cl.DialogActsClassifier(name="Decision tree without duplicates")
-    dt_classifier_dd.train(
-        df_train_deduplicated["utterance_content"],
-        df_train_deduplicated["dialog_act"],
-        hyperparams_dict=dt_params,
-    )
+    dt_classifier_dd.train(df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"],
+                           hyperparams_dict=dt_params)
     tc.evaluate_model(dt_classifier_dd, df_test_deduplicated)
 
     # logistic regression
-    lr_classifier = cl.DialogActsClassifier( model=cl.LogisticRegression(max_iter=10000), name="Logistic regression")
+    lr_classifier = cl.DialogActsClassifier(model=cl.LogisticRegression(max_iter=10000), name="Logistic regression")
     lr_classifier.train(df_train["utterance_content"], df_train["dialog_act"])
     tc.evaluate_model(lr_classifier, df_test)
 
     # logistic regression without duplicates
-    lr_classifier_dd = cl.DialogActsClassifier(
-        model=cl.LogisticRegression(max_iter=10000),
-        name="Logistic regression without duplicates",
-    )
-    lr_classifier_dd.train(
-        df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"]
-    )
+    lr_classifier_dd = cl.DialogActsClassifier(model=cl.LogisticRegression(max_iter=10000),
+                                               name="Logistic regression without duplicates")
+    lr_classifier_dd.train(df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"])
     tc.evaluate_model(lr_classifier_dd, df_test_deduplicated)
 
     # Feed-Forward Neural Network
@@ -157,7 +149,6 @@ def create_models(data_dir):
     tc.evaluate_model(ffnn_classifier_dd, df_test_deduplicated)
 
     # add all models to a dictionary and return it
-
     models_dict = {
         'A': majority_model,
         'B': rule_model,
@@ -168,4 +159,5 @@ def create_models(data_dir):
         'G': ffnn_classifier,
         'H': ffnn_classifier_dd
     }
+
     return models_dict
