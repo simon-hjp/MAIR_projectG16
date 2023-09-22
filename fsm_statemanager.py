@@ -244,6 +244,7 @@ class FiniteStateMachine:
             self._terminated = True
         
         elif self.get_state() == 12:  # Request alternative
+            pass
 
     
     def classifier_handler(self, inp: str):
