@@ -22,4 +22,5 @@ manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, classifie
 while not manager._terminated:
     print(manager._state)
     inp = input('>>>')
-    manager.logic(inp)
+    out = manager.logic(inp)
+    print(out)

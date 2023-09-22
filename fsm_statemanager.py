@@ -15,12 +15,17 @@ class FiniteStateMachine:
             self._classifier = classifier # classifier needs to be trained beforehand
         self._terminated = False
         self._restaurant_db = restaurant_data
+
         self._probable_food = ""  # Variables to hold extracted preferences until they can be confirmed.
         self._probable_area = ""
         self._probable_pricerange = ""
+
         self._preferred_food = ""  # Variables to hold confirmed extracted preferences.
         self._preferred_area = ""
         self._preferred_pricerange = ""
+
+        self._probable_restaurant = ""
+        self._preferred_restaurant = ""
     
     def logic(self, inp: str):
         # One small problem with the current structure; currently the hello state system utterance will always be skipped, not sure if that's intentional.
@@ -171,16 +176,27 @@ class FiniteStateMachine:
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "ack" or dialog_act == "affirm" or dialog_act == "confirm":
                 # do something to get restaurant.
-                if True == True:  # Found a restaurant!
-                    self.add_speech("I have found a restaurant that matches your requirements human! It is the '{}' restaurant. Would you like more information, or is my function hereby fulfilled?")
+                _, rest_df = uer.provide_recommendations(self._restaurant_db, self._preferred_food, self._preferred_pricerange, self._preferred_area) # type: ignore
+                rest_str = rest_df.sample()
+                if rest_str != "No restaurant":  # Found a restaurant!
+                    self._probable_restaurant = rest_str
+                    self.add_speech("I have found a restaurant that matches your requirements human! It is the '{}' restaurant. Would you like more information, or is my function hereby fulfilled?".format(self._probable_restaurant))
                     self.set_state(9)
-                elif False == False:  # Didn't find a restaurant
-                    self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. I will now terminate.")
+                elif rest_str == "No restaurant":  # Didn't find a restaurant
+                    self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. I will now terminate. Goodbye.")
                     self.set_state(11)
 
         elif self.get_state() == 9:  # Give information
-            pass
-
+            dialog_act = self.classifier_handler(inp)   
+            if dialog_act == "reqmore":
+                
+                self.add_speech("Here's some information:")
+                self.add_speech("Address: {}")
+                self.add_speech("Phone number: {}")
+                self.add_speech("Zipcode: {}")
+                self.add_speech("Is there anything else I can be of assistance with? Can I perhaps provide the same information again, or am I done?")
+                self.set_state(8)
+        
         elif self.get_state() == 10:  # Could not find information
             pass
 
@@ -195,34 +211,6 @@ class FiniteStateMachine:
         self._storedstring += string + "\n"
 
     def output_handler(self):
-        """Manually defined function for handling output strings"""
-        # if self.get_state() == 1:  # Hello
-        #     return "Hello, human. I can help you find a restaurant based on your preferences."
-        # elif self.get_state() == 2:  # Ask for food preference
-        #     # do something to extract food from utterance
-        #     return "What kind of cuisine are you interested in?"
-        # elif self.get_state() == 3:  # Suggest spelling (food)
-        #     return "I could not find anything related to {}, are you perhaps interested in {}?".format(self._preferred_food, self.statedfoodlookup)
-        # elif self.get_state() == 4:  # Ask for area preference
-        #     return "What area would you like to find a restaurant in?"
-        # elif self.get_state() == 5:  # Suggest spelling (area)
-        #     return "I could not find anything related to {}, are you perhaps interested in {}?".format(self._preferred_area, self.statedarealookup)
-        # elif self.get_state() == 6:  # Ask for price preference
-        #     return "What price range are you looking for?"
-        # elif self.get_state() == 7:  # Suggest spelling (price)
-        #     return "I could not find any price range related to {}, are you perhaps interested in a {} price range?".format(self._preferred_pricerange, self.statedpricelookup)
-        # elif self.get_state() == 8:  # Suggest restaurant (db lookup)
-        #     return "I would like to suggest you the restaurant '{}'."
-        # elif self.get_state() == 9:  # Give information
-        #     # We need a check here for the type of information we need
-        #     return "The {} you're looking for is {}.".format(self.reqinfotype, self.reqinfo)
-        # elif self.get_state() == 10:  # Information unavailable
-        #     return "I'm sorry, I could not find the {} of the restaurant '{}'.".format(self.reqinfotype)
-        # elif self.get_state() == 11:  # Goodbye (terminate)
-        #     self._terminated = True
-        #     return "Goodbye."
-        # else:
-        #     return "Error"
         tmp = self._storedstring
         self._storedstring = ""
         return tmp
