@@ -26,6 +26,7 @@ class FiniteStateMachine:
 
         self._probable_restaurant = ""
         self._preferred_restaurant = ""
+        self._possible_recommendations = pd.DataFrame()
     
     def logic(self, inp: str):
         # One small problem with the current structure; currently the hello state system utterance will always be skipped, not sure if that's intentional.
@@ -203,28 +204,37 @@ class FiniteStateMachine:
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "ack" or dialog_act == "affirm" or dialog_act == "confirm":
                 # do something to get restaurant.
-                _, rest_df = uer.provide_recommendations(self._restaurant_db, self._preferred_food, self._preferred_pricerange, self._preferred_area) # type: ignore
-                rest_str = rest_df.sample()
-                if rest_str != "No restaurant":  # Found a restaurant!
-                    self._probable_restaurant = rest_str
+                rec, rest_df = uer.provide_recommendations(self._restaurant_db, self._preferred_food, self._preferred_pricerange, self._preferred_area) # type: ignore
+                self._possible_recommendations = rest_df
+                if rec != "No restaurant":  # Found a restaurant!
+                    self._probable_restaurant = rec
                     self.add_speech("I have found a restaurant that matches your requirements human! It is the '{}' restaurant. Would you like more information, or is my function hereby fulfilled?".format(self._probable_restaurant))
                     self.set_state(9)
                     return
-                elif rest_str == "No restaurant":  # Didn't find a restaurant
-                    self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. I will now terminate. Goodbye.")
+                elif rec == "No restaurant":  # Didn't find a restaurant
+                    self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. I will now terminate.")
                     self.set_state(11)
                     return
 
         elif self.get_state() == 9:  # Give information
             dialog_act = self.classifier_handler(inp)   
             if dialog_act == "reqmore":
-                
+                info_dict = uer.get_restaurant_info(restaurants_df=self._restaurant_db, restaurantname=self._probable_restaurant)
                 self.add_speech("Here's some information:")
-                self.add_speech("Address: {}")
-                self.add_speech("Phone number: {}")
-                self.add_speech("Zipcode: {}")
+                self.add_speech(f"Address: {info_dict['address']}")  # type: ignore
+                self.add_speech(f"Phone number: {info_dict['phone']}")  # type: ignore
+                self.add_speech(f"Zipcode: {info_dict['postcode']}")
                 self.add_speech("Is there anything else I can be of assistance with? Can I perhaps provide the same information again, or am I done?")
                 self.set_state(8)
+            if dialog_act == "reqalts":
+                self.add_speech("Not interested in this restaurant? Okay, let me see if I can find an alternative.")
+                if len(self._possible_recommendations) < 1:
+                    self.add_speech("I'm sorry, human. I did not find another restaurant which matches the given requirements. I will now terminate.")
+                    self.set_state(11)
+                    return
+                self._probable_restaurant = self._possible_recommendations.sample(n=1)
+                self._possible_recommendations.drop(self._probable_restaurant.index)
+
         
         elif self.get_state() == 10:  # Could not find information
             pass
@@ -232,6 +242,9 @@ class FiniteStateMachine:
         elif self.get_state() == 11:  # Goodbye (terminate)
             self.add_speech("I am happy that I was able (or tried) to assist. Goodbye human.")
             self._terminated = True
+        
+        elif self.get_state() == 12:  # Request alternative
+
     
     def classifier_handler(self, inp: str):
         return self._classifier.predict_act(inp)

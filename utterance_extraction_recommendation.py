@@ -9,6 +9,7 @@ def info_in_utterance(utterance: str, df: pd.DataFrame):
     # Looking for food
     # Get unique values from the column and convert them to a list
     unique_foods_list = df['food'].unique().tolist()
+    print(unique_foods_list)
 
     # Search for the input in the unique_values_list
     for foodw in unique_foods_list:
@@ -80,13 +81,13 @@ def provide_alternative(recommendations: pd.DataFrame):
     recommendations.drop(alternative_recommendation.index, inplace=True)
     return alternative_recommendation["restaurantname"].iloc[0], recommendations
 
-def get_restaurant_info(restaurants_df: pd.DataFrame, restaurantname: str):
+def get_restaurant_info(restaurants_df: pd.DataFrame, restaurantname: str) -> dict:
     """Given a restaurant name, return its information as a dictionary.
 
     Returns: dictionary with keys 'restaurantname', 'area', 'pricerange', 'food', 'phone', 'addr', 'postcode'.
     """
     if restaurantname not in restaurants_df["restaurantname"].to_list():
-        return "Not found"
+        raise ValueError(f'Could not find {restaurantname} in database')
     return restaurants_df[restaurants_df["restaurantname"]==restaurantname].to_dict(orient='records')[0]
 
 
