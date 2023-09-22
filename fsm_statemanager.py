@@ -237,6 +237,7 @@ class FiniteStateMachine:
             elif dialog_act == "negate" or dialog_act == "deny":
                 self.add_speech("Very well, let us start over, then. What kind of cuisine are you looking for?")
                 self.set_state(2)
+                return
             else:
                 self.add_speech("Are you correctly looking for a {} {} restaurant in the {} area?".format(self._preferred_pricerange, self._preferred_food, self._preferred_area))
                 return
@@ -251,7 +252,8 @@ class FiniteStateMachine:
                 self.add_speech(f"Zipcode: {info_dict['postcode']}")
                 self.add_speech("Is there anything else I can be of assistance with? Can I perhaps provide the same information again, or am I done?")
                 self.set_state(8)
-            if dialog_act == "reqalts":
+                return
+            elif dialog_act == "reqalts":
                 self.add_speech("Not interested in this restaurant? Okay, let me see if I can find an alternative.")
                 if len(self._possible_recommendations) < 1:
                     self.add_speech("I'm sorry, human. I did not find another restaurant which matches the given requirements. I will now terminate.")
