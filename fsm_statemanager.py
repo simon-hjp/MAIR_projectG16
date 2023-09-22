@@ -83,39 +83,28 @@ class FiniteStateMachine:
         if self.get_state() == 1:  # Hello
             return "Hello"
         elif self.get_state() == 2:  # Ask for food preference
-            return ""
-        elif self.get_state() == 3:  # Food preference check
-            pass
-        elif self.get_state() == 4:  # Spelling check (food)
-            pass
-        elif self.get_state() == 5:  # Suggest spelling (food)  
-            pass
-        elif self.get_state() == 6:  # Ask for area preference
-            pass
-        elif self.get_state() == 7:  # Area preference check
-            pass
-        elif self.get_state() == 8:  # Spelling check (area)
-            pass
-        elif self.get_state() == 9:  # Suggest spelling (area)
-            pass
-        elif self.get_state() == 10:  # Ask for price preference
-            pass
-        elif self.get_state() == 11:  # Price preference check
-            pass
-        elif self.get_state() == 12:  # Spelling check (price)
-            pass
-        elif self.get_state() == 13:  # Suggest spelling (price)
-            pass
-        elif self.get_state() == 14:  # Suggest restaurant (db lookup)
-            pass
-        elif self.get_state() == 15:  # Information check (known or not)
-            pass
-        elif self.get_state() == 16:  # Give information
-            pass
-        elif self.get_state() == 17:  # Information unavailable
-            pass
-        elif self.get_state() == 18:  # Goodbye (terminate)
-            return "Goodbye"
+            # do something to extract food from utterance
+            return "What kind of cuisine are you interested in?"
+        elif self.get_state() == 3:  # Suggest spelling (food)
+            return "I could not find anything related to {}, are you perhaps interested in {}?".format(self._preferred_food, self.statedfoodlookup)
+        elif self.get_state() == 4:  # Ask for area preference
+            return "What area would you like to find a restaurant in?"
+        elif self.get_state() == 5:  # Suggest spelling (area)
+            return "I could not find anything related to {}, are you perhaps interested in {}?".format(self.statedarea, self.statedarealookup)
+        elif self.get_state() == 6:  # Ask for price preference
+            return "What price range are you looking for?"
+        elif self.get_state() == 7:  # Suggest spelling (price)
+            return "I could not find any price range related to {}, are you perhaps interested in a {} price range?".format(self.statedprice, self.statedpricelookup)
+        elif self.get_state() == 8:  # Suggest restaurant (db lookup)
+            return "I would like to suggest you the restaurant '{}'."
+        elif self.get_state() == 9:  # Give information
+            # We need a check here for the type of information we need
+            return "The {} you're looking for is {}.".format(self.reqinfotype, self.reqinfo)
+        elif self.get_state() == 10:  # Information unavailable
+            return "I'm sorry, I could not find the {} of the restaurant '{}'.".format(self.reqinfotype)
+        elif self.get_state() == 11:  # Goodbye (terminate)
+            self._terminated = True
+            return "Goodbye."
         else:
             return "Error"
 
