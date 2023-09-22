@@ -58,31 +58,31 @@ def pricerange_spellcheck(pricerange, threshold=2):
 
     return closest_pricerange
 
-
-# Input word to be corrected
-input_word = input("Enter a word: ").lower()
-
-# Get the suggested correction
-correction_food = food_spellcheck(input_word)
-
-if correction_food:
-    print(f"Suggested pricerange correction: {correction_food}")
-else:
-    print("No suggestion found for food.")
-
-correction_pricerange = pricerange_spellcheck(input_word)
-
-if correction_pricerange:
-    print(f"Suggested pricerange correction: {correction_pricerange}")
-else:
-    print("No suggestion found for pricerange.")
-
-
-correction_area = area_spellcheck(input_word)
-if correction_area:
-    print(f"Suggested area correction: {correction_area}")
-else:
-    print("No suggestion found for area.")
+def test_spellchecking():
+    # Input word to be corrected
+    input_word = input("Enter a word: ").lower()
+    
+    # Get the suggested correction
+    correction_food = food_spellcheck(input_word)
+    
+    if correction_food:
+        print(f"Suggested pricerange correction: {correction_food}")
+    else:
+        print("No suggestion found for food.")
+    
+    correction_pricerange = pricerange_spellcheck(input_word)
+    
+    if correction_pricerange:
+        print(f"Suggested pricerange correction: {correction_pricerange}")
+    else:
+        print("No suggestion found for pricerange.")
+    
+    
+    correction_area = area_spellcheck(input_word)
+    if correction_area:
+        print(f"Suggested area correction: {correction_area}")
+    else:
+        print("No suggestion found for area.")
 
 
 

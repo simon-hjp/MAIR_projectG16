@@ -7,3 +7,5 @@ ingo_work.py
 # Vscode auto-generated configurations
 .vscode/
 Data/
+
+__pycache__/

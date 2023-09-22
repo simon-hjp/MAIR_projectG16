@@ -84,14 +84,16 @@ def get_restaurant_info(restaurants_df: pd.DataFrame, restaurantname: str):
         return "Not found"
     return restaurants_df[restaurants_df["restaurantname"]==restaurantname].to_dict(orient='records')[0]
 
-restaurant_data = pd.read_csv('Data/restaurant_info.csv')
 
-while True:
-    utterance = input("Hello, how can I help you?\nYour utterance ('1' to quit): ").lower()
-    if utterance == '1':
-        break
+def test_uer():
+    restaurant_data = pd.read_csv('Data/restaurant_info.csv')
     
-    info_dict = info_in_utterance(utterance, restaurant_data)
-    recommendation = provide_recommendations(restaurants_df=restaurant_data, req_food=info_dict["food"], req_area=info_dict["area"], req_pricerange=info_dict["pricerange"])
-    print("Recommended restaurant:", recommendation)
-    print("Recommendation info:", get_restaurant_info(restaurant_data, recommendation))
+    while True:
+        utterance = input("Hello, how can I help you?\nYour utterance ('1' to quit): ").lower()
+        if utterance == '1':
+            break
+        
+        info_dict = info_in_utterance(utterance, restaurant_data)
+        recommendation = provide_recommendations(restaurants_df=restaurant_data, req_food=info_dict["food"], req_area=info_dict["area"], req_pricerange=info_dict["pricerange"])
+        print("Recommended restaurant:", recommendation)
+        print("Recommendation info:", get_restaurant_info(restaurant_data, recommendation))
