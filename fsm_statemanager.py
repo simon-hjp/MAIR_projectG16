@@ -140,7 +140,7 @@ class FiniteStateMachine:
                     self._probable_area = ls.area_spellcheck(uid["area"], 3)
                     self.set_state(5)
                     return
-                elif uid["area"] != "" and uid["area"] == ls.area_spellcheck(uid["rea"], 3):
+                elif uid["area"] != "" and uid["area"] == ls.area_spellcheck(uid["area"], 3):
                     self._preferred_area = uid["area"]
                     self.add_speech("I understood that you are interested in restaurants in the {} area, what price range are you looking for?".format(uid["area"]))
                     self.set_state(6)
