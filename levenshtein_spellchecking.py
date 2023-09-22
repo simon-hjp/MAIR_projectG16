@@ -4,14 +4,13 @@ from Levenshtein import distance
 
 # Reading the csv
 csv_file = 'Data/restaurant_info.csv'
-df = pd.read_csv(csv_file, sep=';')
+df = pd.read_csv(csv_file, sep=',')
+print()
 
 # Spellchecking for food
 def food_spellcheck(food, threshold=2):
-    # Extract values from the 4th column
-    foods_in_column_4 = df.iloc[:, 3]
     # Get unique values from the column and convert them to a list
-    unique_foods_list = foods_in_column_4.unique().tolist()
+    unique_foods_list = df['food'].unique().tolist()
 
     closest_food = None # No suggestion yet
     min_distance = threshold # How many steps to edit to the correct word (delete, change, add letters etc.)
@@ -61,23 +60,23 @@ def pricerange_spellcheck(pricerange, threshold=2):
 def test_spellchecking():
     # Input word to be corrected
     input_word = input("Enter a word: ").lower()
-    
+
     # Get the suggested correction
     correction_food = food_spellcheck(input_word)
-    
+
     if correction_food:
         print(f"Suggested pricerange correction: {correction_food}")
     else:
         print("No suggestion found for food.")
-    
+
     correction_pricerange = pricerange_spellcheck(input_word)
-    
+
     if correction_pricerange:
         print(f"Suggested pricerange correction: {correction_pricerange}")
     else:
         print("No suggestion found for pricerange.")
-    
-    
+
+
     correction_area = area_spellcheck(input_word)
     if correction_area:
         print(f"Suggested area correction: {correction_area}")

@@ -7,11 +7,8 @@ def info_in_utterance(utterance: str, df: pd.DataFrame):
     pricerange = ""
 
     # Looking for food
-    # Extract values from the 4th column
-    foods_in_column_4 = df.iloc[:, 3]
-
     # Get unique values from the column and convert them to a list
-    unique_foods_list = foods_in_column_4.unique().tolist()
+    unique_foods_list = df['food'].unique().tolist()
 
     # Search for the input in the unique_values_list
     for food in unique_foods_list:
