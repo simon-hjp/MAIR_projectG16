@@ -7,11 +7,8 @@ def info_in_utterance(utterance: str, df: pd.DataFrame):
     pricerange = ""
 
     # Looking for food
-    # Extract values from the 4th column
-    foods_in_column_4 = df.iloc[:, 3]
-
     # Get unique values from the column and convert them to a list
-    unique_foods_list = foods_in_column_4.unique().tolist()
+    unique_foods_list = df['food'].unique().tolist()
 
     # Search for the input in the unique_values_list
     for food in unique_foods_list:
@@ -72,7 +69,16 @@ def provide_recommendations(restaurants_df: pd.DataFrame, req_food="", req_price
     
     if len(possible_recs) < 1:
         return "No restaurant", possible_recs
-    return possible_recs["restaurantname"].sample(n=1, random_state=5).iloc[0], possible_recs
+    recommendation = possible_recs.sample(n=1, random_state=5).iloc[0]
+    possible_recs.drop(recommendation.index, inplace=True)
+    return recommendation["restaurantname"].iloc[0], possible_recs
+
+def provide_alternative(recommendations: pd.DataFrame):
+    if len(recommendations) < 1:
+        return "no alternative possible", recommendations
+    alternative_recommendation = recommendations.sample(n=1, random_state=5).iloc[0]
+    recommendations.drop(alternative_recommendation.index, inplace=True)
+    return alternative_recommendation["restaurantname"].iloc[0], recommendations
 
 def get_restaurant_info(restaurants_df: pd.DataFrame, restaurantname: str):
     """Given a restaurant name, return its information as a dictionary.

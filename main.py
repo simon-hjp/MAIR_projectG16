@@ -20,5 +20,7 @@ classifier.train(X_train=dialog_training_df["utterance_content"], y_train=dialog
 # initialize dialog agent
 manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, classifier=classifier, startstate=1)
 while not manager._terminated:
+    print(manager._state)
     inp = input('>>>')
-    manager.logic(inp)
+    out = manager.logic(inp)
+    print(out)
