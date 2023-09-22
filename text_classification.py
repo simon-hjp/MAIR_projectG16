@@ -528,6 +528,7 @@ def command_line_testing(models_dict: dict):
 
 def run(data_dir="Data\\dialog_acts.dat"):
     """Train models and report their performance, then initiate the command line testing."""
+
     trained_models = create_models(data_dir=data_dir)
     command_line_testing(trained_models)
 
