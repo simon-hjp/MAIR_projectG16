@@ -40,6 +40,7 @@ class FiniteStateMachine:
             if dialog_act == "hello":
                 self.add_speech("Hello, human. I can help you find a restaurant based on your preferences. What kind of cuisine are you interested in?")
                 self.set_state(2)
+                return
             if dialog_act == "inform":
                 uid = uer.info_in_utterance(utterance=inp, df=self._restaurant_db)  # Utterance Information Dictionary
 
@@ -139,7 +140,7 @@ class FiniteStateMachine:
                     self._probable_area = ls.area_spellcheck(uid["area"], 3)
                     self.set_state(5)
                     return
-                elif uid["area"] != "" and uid["area"] == ls.area_spellcheck(uid["rea"], 3):
+                elif uid["area"] != "" and uid["area"] == ls.area_spellcheck(uid["area"], 3):
                     self._preferred_area = uid["area"]
                     self.add_speech("I understood that you are interested in restaurants in the {} area, what price range are you looking for?".format(uid["area"]))
                     self.set_state(6)
@@ -233,7 +234,7 @@ class FiniteStateMachine:
                     return
                 self._probable_restaurant = self._possible_recommendations.sample(n=1)
                 self._possible_recommendations.drop(self._probable_restaurant.index)
-
+                self.set_state(9)
         
         elif self.get_state() == 10:  # Could not find information
             pass
@@ -243,6 +244,7 @@ class FiniteStateMachine:
             self._terminated = True
         
         elif self.get_state() == 12:  # Request alternative
+            pass
 
     
     def classifier_handler(self, inp: str):
