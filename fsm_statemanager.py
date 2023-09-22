@@ -108,9 +108,9 @@ class FiniteStateMachine:
                     self.add_speech("I understood that you are interested in {} cuisine, what area are you looking for?".format(self._preferred_food))
                     self.set_state(4)
                     return
-                else:
-                    self.add_speech("Human, please state the type of food you are interested in.")
-                    return
+            else:
+                self.add_speech("Human, please state the type of food you are interested in.")
+                return
 
         elif self.get_state() == 3:  # Food spelling check
             # check whether food preference was extracted properly from previous state
@@ -152,9 +152,9 @@ class FiniteStateMachine:
                     self.add_speech("I understood that you are interested in restaurants in the {} area, what price range are you looking for?".format(uid["area"]))
                     self.set_state(6)
                     return
-                else:
-                    self.add_speech("Human, please state the area you are interested in.")
-                    return
+            else:
+                self.add_speech("Human, please state the area you are interested in.")
+                return
 
         elif self.get_state() == 5:  # Suggest spelling (area)
             dialog_act = self.classifier_handler(inp)
@@ -193,9 +193,9 @@ class FiniteStateMachine:
                     self.add_speech("I understood that you are interested in a {} {} restaurant in the {} area, is all this information correct?".format(self._preferred_pricerange, self._preferred_food, self._preferred_area))
                     self.set_state(8)
                     return
-                else:
-                    self.add_speech("Human, please state the price range you are looking for.")
-                    return
+            else:
+                self.add_speech("Human, please state the price range you are looking for.")
+                return
 
         elif self.get_state() == 7:  # Spelling check (pricerange)
             dialog_act = self.classifier_handler(inp)
@@ -234,6 +234,9 @@ class FiniteStateMachine:
                     self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. I will now terminate.")
                     self.set_state(11)
                     return
+            elif dialog_act == "negate" or dialog_act == "deny":
+                self.add_speech("Very well, let us start over, then. What kind of cuisine are you looking for?")
+                self.set_state(2)
             else:
                 self.add_speech("Are you correctly looking for a {} {} restaurant in the {} area?".format(self._preferred_pricerange, self._preferred_food, self._preferred_area))
                 return
