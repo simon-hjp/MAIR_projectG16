@@ -9,7 +9,6 @@ def info_in_utterance(utterance: str, df: pd.DataFrame):
     # Looking for food
     # Get unique values from the column and convert them to a list
     unique_foods_list = df['food'].unique().tolist()
-    print(unique_foods_list)
 
     # Search for the input in the unique_values_list
     for foodw in unique_foods_list:
