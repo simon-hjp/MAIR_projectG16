@@ -1,9 +1,9 @@
-# MAIR_projectG16
-
+<h1> MAIR_projectG16 </h1>
+ 
 Welcome to the Restaurant Recommendations Dialog System project of group 16! 
 In this project, we will design, implement, evaluate, and document a restaurant recommendations dialog system using various AI techniques. Our goal is to create a AI-driven system that can assist users in finding a restaurant for their needs.
 
-## Table of Contents
+<h2> Table of Contents </h2>
 
 - [Introduction](#introduction)
 - [Installation](#installation)
@@ -11,7 +11,7 @@ In this project, we will design, implement, evaluate, and document a restaurant 
 - [Libraries](#libraries)
 - [License](#license)
 
-## Introduction
+<h2> Introduction</h2>
 This project is divided into two main parts:
 
 **Part 1**: Implementation of the Dialog System
@@ -30,10 +30,11 @@ Using the dialog model and NLP classifier, we'll develop a text-based dialog sys
 **Part 2**:
 Has not started yet.
 
-## Installation
+<h2> Installation</h2>
 
 Make sure you have Python installed on your system before running this command.
-`pip install -r requirements.txt`
+```bash
+pip install -r requirements.txt```
 
 This command automatically installs the required libraries on your machine.
 
