@@ -234,7 +234,7 @@ class FiniteStateMachine:
                     return
                 self._probable_restaurant = self._possible_recommendations.sample(n=1)
                 self._possible_recommendations.drop(self._probable_restaurant.index)
-
+                self.set_state(9)
         
         elif self.get_state() == 10:  # Could not find information
             pass
