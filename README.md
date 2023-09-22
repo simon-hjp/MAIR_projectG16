@@ -36,11 +36,12 @@ Make sure you have Python installed on your system before running this command.
 ```bash
 pip install -r requirements.txt
 ```
-##Usage
+
+#Usage
 
 Describe how users can use your project effectively. Provide examples and instructions as needed.
 
-##Libraries
+#Libraries
 
 The project relies on several Python libraries to achieve its functionality. Here are the key libraries used in this project:
 
@@ -61,7 +62,7 @@ TfidfVectorizer, also from scikit-learn, is used for text feature extraction, pa
 
 Please refer to the documentation of each library for more details on their usage and capabilities.
 
-##License
+#License
 
 This project is licensed under the MIT License. You can find the full license details in the LICENSE file.
 
