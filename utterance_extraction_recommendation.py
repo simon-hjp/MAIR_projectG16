@@ -11,9 +11,9 @@ def info_in_utterance(utterance: str, df: pd.DataFrame):
     unique_foods_list = df['food'].unique().tolist()
 
     # Search for the input in the unique_values_list
-    for food in unique_foods_list:
-        if food in utterance:
-            food = food
+    for foodw in unique_foods_list:
+        if foodw in utterance:
+            food = foodw
             print(f"food = {food}")
             break    
 

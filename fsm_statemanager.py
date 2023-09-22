@@ -36,7 +36,7 @@ class FiniteStateMachine:
         """Manually defined function for handling logic with string inputs"""
         if self.get_state() == 1:  # Hello
             dialog_act = self.classifier_handler(inp)
-            if dialog_act == "hi":
+            if dialog_act == "hello":
                 self.add_speech("Hello, human. I can help you find a restaurant based on your preferences. What kind of cuisine are you interested in?")
                 self.set_state(2)
             if dialog_act == "inform":
@@ -78,7 +78,7 @@ class FiniteStateMachine:
                 else:
                     self._preferred_pricerange = uid["pricerange"]
 
-                self.add_speech("Alright, I understood you prefer a {} restaurant serving {} food, in the {} area.".format(self._preferred_pricerange,self._preferred_food, self._preferred_area))
+                self.add_speech("Alright, I understood you prefer a {} restaurant serving {} food, in the {} area. Is this correct?".format(self._preferred_pricerange,self._preferred_food, self._preferred_area))
                 self.set_state(8)
                 return
             else:
