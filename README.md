@@ -33,8 +33,7 @@ Has not started yet.
 <h2> Installation</h2>
 
 Make sure you have Python installed on your system before running this command.
-```bash
-pip install -r requirements.txt```
+`pip install -r requirements.txt`
 
 This command automatically installs the required libraries on your machine.
 
