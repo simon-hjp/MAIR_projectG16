@@ -1,6 +1,7 @@
 import pandas as pd
+# from levenshtein_spellchecking import food_spellcheck, area_spellcheck, pricerange_spellcheck
 
-def info_in_utterance(utterance, df):
+def info_in_utterance(utterance: str, df: pd.DataFrame):
     # Initialize variables
     area = ""
     food = ""
@@ -16,11 +17,12 @@ def info_in_utterance(utterance, df):
     # Search for the input in the unique_values_list
     for food in unique_foods_list:
         if food in utterance:
+            food = food
             print(f"food = {food}")
-            break
+            break    
 
     # Check if the utterance contains words related to area (north, west, east, south)
-    area_words = ["north", "west", "east", "south"]
+    area_words = ["north", "west", "east", "south", "center"]
     for word in area_words:
         if word in utterance:
             area = word
