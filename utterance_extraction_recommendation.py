@@ -72,7 +72,16 @@ def provide_recommendations(restaurants_df: pd.DataFrame, req_food="", req_price
     
     if len(possible_recs) < 1:
         return "No restaurant", possible_recs
-    return possible_recs["restaurantname"].sample(n=1, random_state=5).iloc[0], possible_recs
+    recommendation = possible_recs.sample(n=1, random_state=5).iloc[0]
+    possible_recs.drop(recommendation.index, inplace=True)
+    return recommendation["restaurantname"].iloc[0], possible_recs
+
+def provide_alternative(recommendations: pd.DataFrame):
+    if len(recommendations) < 1:
+        return "no alternative possible", recommendations
+    alternative_recommendation = recommendations.sample(n=1, random_state=5).iloc[0]
+    recommendations.drop(alternative_recommendation.index, inplace=True)
+    return alternative_recommendation["restaurantname"].iloc[0], recommendations
 
 def get_restaurant_info(restaurants_df: pd.DataFrame, restaurantname: str):
     """Given a restaurant name, return its information as a dictionary.
