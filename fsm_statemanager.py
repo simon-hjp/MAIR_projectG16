@@ -232,7 +232,7 @@ class FiniteStateMachine:
                     return
                 elif rec == "No restaurant":  # Didn't find a restaurant
                     self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. I will now terminate.")
-                    self.set_state(11)
+                    self.set_state(10)
                     return
             elif dialog_act == "negate" or dialog_act == "deny":
                 self.add_speech("Very well, let us start over, then. What kind of cuisine are you looking for?")
@@ -255,7 +255,7 @@ class FiniteStateMachine:
                 self.add_speech("Not interested in this restaurant? Okay, let me see if I can find an alternative.")
                 if len(self._possible_recommendations) < 1:
                     self.add_speech("I'm sorry, human. I did not find another restaurant which matches the given requirements. I will now terminate.")
-                    self.set_state(11)
+                    self.set_state(10)
                     return
                 self._probable_restaurant = self._possible_recommendations.sample(n=1)
                 self._possible_recommendations.drop(self._probable_restaurant.index)
@@ -264,16 +264,10 @@ class FiniteStateMachine:
             else:
                 self.add_speech("Human, would you like more information of the {} restaurant, or perhaps you want alternative restaurants?")
                 return
-        
-        elif self.get_state() == 10:  # Could not find information
-            pass
 
-        elif self.get_state() == 11:  # Goodbye (terminate)
+        elif self.get_state() == 10:  # Goodbye (terminate)
             self.add_speech("I am happy that I was able (or tried) to assist. Goodbye human.")
             self._terminated = True
-        
-        elif self.get_state() == 12:  # Request alternative
-            pass
 
     
     def classifier_handler(self, inp: str):
