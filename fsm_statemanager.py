@@ -261,7 +261,7 @@ class FiniteStateMachine:
                     return
                 tmp = self._possible_recommendations.sample(n=1)
                 self._probable_restaurant = tmp["restaurantname"].iloc[0]
-                self._possible_recommendations.drop(tmp.index)
+                self._possible_recommendations = self._possible_recommendations.drop(tmp.index)
                 self.add_speech("I have found another restaurant that matches your requirements human! It is the '{}' restaurant. Would you like more information about this restaurant? Or am I done?".format(self._probable_restaurant))
                 self.set_state(9)
                 return
