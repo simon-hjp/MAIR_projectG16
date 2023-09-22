@@ -39,6 +39,7 @@ class FiniteStateMachine:
             if dialog_act == "hello":
                 self.add_speech("Hello, human. I can help you find a restaurant based on your preferences. What kind of cuisine are you interested in?")
                 self.set_state(2)
+                return
             if dialog_act == "inform":
                 uid = uer.info_in_utterance(utterance=inp, df=self._restaurant_db)  # Utterance Information Dictionary
 
