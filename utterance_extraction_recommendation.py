@@ -19,7 +19,7 @@ def info_in_utterance(utterance: str, df: pd.DataFrame):
             break    
 
     # Check if the utterance contains words related to area (north, west, east, south)
-    area_words = ["north", "west", "east", "south", "center"]
+    area_words = ["north", "west", "east", "south", "center", "centre"]
     for word in area_words:
         if word in utterance:
             area = word
