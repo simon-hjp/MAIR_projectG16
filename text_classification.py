@@ -4,7 +4,6 @@
 ####
 
 import pandas as pd
-import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
@@ -40,7 +39,6 @@ def import_data(data_dir: str, drop_duplicates=False):
 ##### Evaluation
 ###
 
-
 def evaluate_model(model, df_test):
     """Evaluate the performance of a trained model on the test dataset.
     """
@@ -49,8 +47,8 @@ def evaluate_model(model, df_test):
 
     y_hat = model.predict(X_test)
 
-    if hasattr(model, "label_encoder"):
-        y_hat = model.label_encoder.inverse_transform(y_hat)
+    if not( model.name == "Majority baseline classifier" or model.name == "Rule-based baseline classifier"):
+        y_hat = cl.label_encoder.inverse_transform(y_hat)
     # calculate performance metrics
     print(f"{model.name} performance evaluation")
     model_performance = classification_report(y_test, y_hat, output_dict=True, zero_division=0)
@@ -60,7 +58,6 @@ def evaluate_model(model, df_test):
     model_performance.drop("support", axis=1, inplace=True)
     model_performance.index.name = "Dialog act"
     print(model_performance)
-
 
 def user_testing(model):
     """Predict an utterance given by the user with a trained model.
