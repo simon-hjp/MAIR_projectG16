@@ -14,7 +14,7 @@ In this project, we will design, implement, evaluate, and document a restaurant 
 ## Introduction
 This project is divided into two main parts:
 
-###Part 1: Implementation of the Dialog System
+**Part 1**: Implementation of the Dialog System
 
 In the first part of the project, we will focus on building the foundation of our dialog system. This involves:
 
@@ -34,8 +34,8 @@ Has not started yet.
 
 Make sure you have Python installed on your system before running this command.
 ```bash
-pip install -r requirements.txt```
-
+pip install -r requirements.txt
+```
 ##Usage
 
 Describe how users can use your project effectively. Provide examples and instructions as needed.
