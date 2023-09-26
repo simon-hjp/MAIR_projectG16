@@ -26,7 +26,9 @@ restaurants_database['crowdedness'] = np.random.choice(crowdedness_vals, restaur
 restaurants_database['length_stay'] = np.random.choice(length_stay_vals, restaurants_database.shape[0])
 
 # initialize and train dialog act classifier
-classifier = classifiers.DialogActsClassifier()
+classifiers.label_encoder.fit(dialog_training_df["dialog_act"])
+classifiers.vectorizer.fit(dialog_training_df["utterance_content"])
+classifier = classifiers.FeedForwardNeuralNetworkClassifier()
 classifier.train(x_train=dialog_training_df["utterance_content"], y_train=dialog_training_df["dialog_act"],)
 
 # initialize dialog agent
