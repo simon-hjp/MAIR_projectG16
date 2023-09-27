@@ -52,7 +52,7 @@ class FeedForwardNeuralNetwork:
         y_train = to_categorical(y_train, num_classes=num_classes)
 
         # Print the training of the model, 0 = nothing printed, 1 = training progress bar, 2 = one line per epoch
-        print_training = 0
+        print_training = 2
         history = self.model.fit(x_train, y_train, epochs=7, batch_size=400, validation_split=0.2
                                  , shuffle=True, verbose=print_training)
         # monitoring the training progress and plotting the learning curves
@@ -137,7 +137,7 @@ def create_models(data_dir):
                                                name="Logistic regression without duplicates")
     lr_classifier_dd.train(df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"])
     tc.evaluate_model(lr_classifier_dd, df_test_deduplicated)
-
+    
     # Feed-Forward Neural Network
     ffnn_classifier = cl.FeedForwardNeuralNetworkClassifier(name="Feed-Forward Neural Network")
     ffnn_classifier.train(df_train["utterance_content"], df_train["dialog_act"])
