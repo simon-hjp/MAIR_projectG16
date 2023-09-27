@@ -273,6 +273,11 @@ class FiniteStateMachine:
             self.add_speech("I am happy that I was able (or tried) to assist. Goodbye human.")
             self._terminated = True
 
+        elif self.get_state() == 11:  # TODO: Pre-terminal state; possibility to revert to state 2 here.
+            pass
+
+        elif self.get_state() == 12:  # TODO: Pre-suggestion state; possibility to supply additional information for logic module
+            pass
     
     def classifier_handler(self, inp: str):
         return self._classifier.predict_act(inp)
