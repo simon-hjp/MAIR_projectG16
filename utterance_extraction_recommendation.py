@@ -154,4 +154,4 @@ def test_uer():
         recommendation = recommendations.sample(n=1)
         print('Recommended restaurant:', recommendation['restaurantname'], f'\n{output_str}')
 
-test_uer()
+# test_uer()

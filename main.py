@@ -6,12 +6,15 @@ import utterance_extraction_recommendation as uer
 import levenshtein_spellchecking as ls
 import pandas as pd
 import numpy as np
+import time
 
-# global variables for configurability
-spell_checking = True
-ask_spell_checking_confirmation = True
-output_all_caps = False
-add_output_delay = False
+# Dictionary containing the configuration values
+configuration_dict = {
+    'spell_checking': True,
+    'ask_spell_checking_confirmation': True,
+    'output_all_caps': True,
+    'add_output_delay': True
+}
 
 # data imports
 dialog_training_df, dialog_testing_df = text_classification.import_data(data_dir="Data/dialog_acts.dat", drop_duplicates=True)
@@ -34,10 +37,12 @@ classifier = classifiers.FeedForwardNeuralNetworkClassifier()
 classifier.train(x_train=dialog_training_df["utterance_content"], y_train=dialog_training_df["dialog_act"],)
 
 # initialize dialog agent
-manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, classifier=classifier, startstate=1)
+manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, configuration=configuration_dict, classifier=classifier, startstate=1)
 while not manager._terminated:
     print(manager._state)
-    print('>>>',end="")
+    print('>>>', end="")
     inp = input()
     out = manager.logic(inp)
+    if manager._configuration['add_output_delay']:
+        time.sleep(2)
     print(out)

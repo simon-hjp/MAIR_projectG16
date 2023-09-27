@@ -4,10 +4,11 @@ import levenshtein_spellchecking as ls
 import pandas as pd
 
 class FiniteStateMachine:
-    def __init__(self, restaurant_data: pd.DataFrame, classifier=None, startstate: int=0, endstate: int=18):
+    def __init__(self, restaurant_data: pd.DataFrame, configuration: dict, classifier=None, startstate: int=0, endstate: int=18):
         self._state = startstate
         self._start = startstate
         self._end = endstate
+        self._configuration = configuration
         self._storedstring = ""  # String to output to user.
         if classifier == None:
             self._classifier = classifiers.RuleBaselineClassifier()  # The output of the function must be a dialog_act as in a string!
@@ -283,6 +284,8 @@ class FiniteStateMachine:
         return self._classifier.predict_act(inp)
 
     def add_speech(self, string: str):
+        if self._configuration['output_all_caps']:
+            string = string.upper()
         self._storedstring += string + "\n"
 
     def output_handler(self):
