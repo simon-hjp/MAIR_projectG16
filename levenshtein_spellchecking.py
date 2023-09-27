@@ -5,6 +5,8 @@ from Levenshtein import distance
 csv_file = 'Data/restaurant_info.csv'
 df = pd.read_csv(csv_file, sep=',')
 
+# TODO consolidate into one function that takes list of known values as argument
+
 # Spellchecking for food
 def food_spellcheck(food, threshold=3):
     # Get unique values from the column and convert them to a list
@@ -54,6 +56,20 @@ def pricerange_spellcheck(pricerange, threshold=3):
             closest_pricerange = known_pricerange
 
     return closest_pricerange
+
+def preference_spellcheck(preference, threshold=3):
+    closest_preference = None
+    min_distance = threshold
+    known_preferences = ['touristic', 'not touristic', 'romantic', 'not romantic',
+                        'children', 'no children', 'not children', 'assigned seats',
+                        'no assigned seats', 'not assigned seats']
+    for known_preference in known_preferences:
+        d = distance(preference, known_preference)
+        if d < min_distance:
+            min_distance = d
+            closest_preference = known_preference
+    
+    return closest_preference
 
 def test_spellchecking():
     # Input word to be corrected
