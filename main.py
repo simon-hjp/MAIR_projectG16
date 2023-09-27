@@ -28,7 +28,9 @@ restaurants_database['length_stay'] = np.random.choice(length_stay_vals, restaur
 # initialize and train dialog act classifier
 classifiers.label_encoder.fit(dialog_training_df["dialog_act"])
 classifiers.vectorizer.fit(dialog_training_df["utterance_content"])
+
 classifier = classifiers.FeedForwardNeuralNetworkClassifier()
+# this classifier is already deduplicated since the duplications have been removed when the data was retrieved
 classifier.train(x_train=dialog_training_df["utterance_content"], y_train=dialog_training_df["dialog_act"],)
 
 # initialize dialog agent
