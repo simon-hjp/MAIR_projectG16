@@ -44,10 +44,9 @@ else:
 # initialize dialog agent
 manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, configuration=configuration_dict, classifier=classifier, startstate=1)
 # print welcome message
-print('Hi! Welcome to this automated restaurant')
+print('Good day human! Welcome to this automated restaurant recommendation system. Please state what kind of restaurant you are looking for.')
 while not manager._terminated:
     print(manager._state)
-    # print('>>>', end="")
     inp = input('>>>')
     out = manager.logic(inp)
     if manager._configuration['add_output_delay']:

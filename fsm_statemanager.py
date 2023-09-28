@@ -296,14 +296,13 @@ class FiniteStateMachine:
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "ack" or dialog_act == "affirm" or dialog_act == "confirm":
                 # do something to get restaurant.
-                recommendations = uer.provide_recommendations(self._restaurant_db, self._preferred_food, self._preferred_pricerange, self._preferred_area) # type: ignore
-                self._possible_recommendations = recommendations
+                self._possible_recommendations = uer.provide_recommendations(self._restaurant_db, self._preferred_food, self._preferred_pricerange, self._preferred_area) # type: ignore
                 if self._possible_recommendations.shape[0] >= 1:  # Found a restaurant!
                     self._probable_restaurant, self._possible_recommendations = uer.pop_recommendation(self._possible_recommendations)
-                    self.add_speech("I have found a restaurant that matches your requirements human! It is the '{}' restaurant. Would you like more information?".format(self._probable_restaurant))
+                    self.add_speech(f"I have found a restaurant that matches your requirements human! It is the '{self._probable_restaurant}' restaurant. Would you like more information?")
                     self.set_state(10)
                     return
-                elif self._possible_recommendations.shape[0] < 1:  # Didn't find a restaurant
+                else:  # Didn't find a restaurant
                     self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. Would you like to start over or is my function fullfilled?")
                     self.set_state(11)
                     return

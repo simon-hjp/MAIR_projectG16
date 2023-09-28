@@ -109,11 +109,12 @@ def preference_reasoning(rec_rests: pd.DataFrame, req_consequent: str) -> tuple[
     return rec_rests, 'This restaurant should be fine.'
 
 def pop_recommendation(recommendations: pd.DataFrame):
+    # print(recommendations)
     if len(recommendations) < 1:
         return "no alternative possible", recommendations
-    alternative_recommendation = recommendations.sample(n=1, random_state=5).iloc[0]
-    recommendations.drop(alternative_recommendation.index, inplace=True)
-    return alternative_recommendation["restaurantname"].iloc[0], recommendations
+    selected_restaurant = recommendations.sample(n=1, random_state=5).iloc[0]
+    recommendations.drop(selected_restaurant.name, inplace=True)
+    return selected_restaurant["restaurantname"], recommendations
 
 def get_restaurant_info(restaurants_df: pd.DataFrame, restaurantname: str) -> dict:
     """Given a restaurant name, return its information as a dictionary.
