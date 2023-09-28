@@ -108,7 +108,7 @@ class DialogActsClassifier:
             self.model = model
         self.name = name
 
-    def train(self, x_train, y_train, hyperparams_dict=None):
+    def train(self, x_train, y_train, fit_hyperparams=False):
         """Fit the label encoder, the bag-of-words vectorizer and train the model."""
         # fit label encoder and transform dependent variable
         label_encoder.fit(y_train)
@@ -119,20 +119,30 @@ class DialogActsClassifier:
         x_train_bow = vectorizer.transform(x_train)
 
         # if a hyperparameter grid is specified, perform a grid search
-        if hyperparams_dict is None:
-            self.model.fit(x_train_bow, y_train_encoded)
-        else:
+        if fit_hyperparams:
+
+            dt_params = {
+                "criterion": ["gini", "entropy"],
+                "max_depth": [None, 10, 20, 30, 40],
+                "min_samples_split": [2, 4, 6, 8, 10],
+                "min_samples_leaf": [1, 2, 3, 4],
+                "max_features": [None, "sqrt", "log2"],
+                "class_weight": [None, "balanced"],
+            }
+
             print(f"Performing grid search for {self.name}")
             cv = StratifiedKFold(n_splits=3)
             gridsearch = GridSearchCV(
                 estimator=self.model,
                 cv=cv,
                 scoring="f1_macro",
-                param_grid=hyperparams_dict,
+                param_grid=dt_params,
                 n_jobs=-1,
             )
             gridsearch.fit(x_train_bow, y_train_encoded)
             self.model = gridsearch.best_estimator_
+        else:
+            self.model.fit(x_train_bow, y_train_encoded)
 
     def predict(self, x_test):
         """Predict dialog acts for test data."""

@@ -6,12 +6,15 @@ import utterance_extraction_recommendation as uer
 import levenshtein_spellchecking as ls
 import pandas as pd
 import numpy as np
+import time
 
-# global variables for configurability
-spell_checking = True
-ask_spell_checking_confirmation = True
-output_all_caps = False
-add_output_delay = False
+# Dictionary containing the configuration values
+configuration_dict = {
+    'spellchecking': True,  # this could be something else too, turning spellchecking off might be easy to implement though
+    'use_rulebaseline': True,
+    'output_all_caps': False,
+    'add_output_delay': False
+}
 
 # data imports
 dialog_training_df, dialog_testing_df = text_classification.import_data(data_dir="Data/dialog_acts.dat", drop_duplicates=True)
@@ -29,15 +32,23 @@ restaurants_database['length_stay'] = np.random.choice(length_stay_vals, restaur
 classifiers.label_encoder.fit(dialog_training_df["dialog_act"])
 classifiers.vectorizer.fit(dialog_training_df["utterance_content"])
 
-classifier = classifiers.FeedForwardNeuralNetworkClassifier()
-# this classifier is already deduplicated since the duplications have been removed when the data was retrieved
-classifier.train(x_train=dialog_training_df["utterance_content"], y_train=dialog_training_df["dialog_act"],)
+if configuration_dict['use_rulebaseline']:
+    classifier = classifiers.RuleBaselineClassifier()
+else:
+    classifier = classifiers.FeedForwardNeuralNetworkClassifier()
+    print('Training classifier...')
+    # this classifier is already deduplicated since the duplications have been removed when the data was retrieved
+    classifier.train(x_train=dialog_training_df["utterance_content"], y_train=dialog_training_df["dialog_act"])
+    print('Classifier is ready.')
 
 # initialize dialog agent
-manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, classifier=classifier, startstate=1)
+manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, configuration=configuration_dict, classifier=classifier, startstate=1)
+# print welcome message
+print('Good day human! Welcome to this automated restaurant recommendation system. Please state what kind of restaurant you are looking for.')
 while not manager._terminated:
     print(manager._state)
-    print('>>>',end="")
-    inp = input()
+    inp = input('>>>')
     out = manager.logic(inp)
+    if manager._configuration['add_output_delay']:
+        time.sleep(2)
     print(out)
