@@ -293,7 +293,7 @@ class FiniteStateMachine:
                     self.set_state(10)
                     return
                 elif self._possible_recommendations.shape[0] < 1:  # Didn't find a restaurant
-                    self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. Would you like to start over or may I self-terminate?")
+                    self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. Would you like to start over or is my function fullfilled?")
                     self.set_state(11)
                     return
             elif dialog_act == "negate" or dialog_act == "deny":
@@ -317,12 +317,12 @@ class FiniteStateMachine:
             elif dialog_act == "reqalts":
                 self.add_speech("Not interested in this restaurant? Okay, let me see if I can find an alternative.")
                 if len(self._possible_recommendations) < 1:
-                    self.add_speech("I'm sorry, human. I did not find another restaurant which matches the given requirements. I will now terminate.")
-                    self.set_state(10)
+                    self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. Would you like to start over or is my function fullfilled?")
+                    self.set_state(11)
                     return
                 self._probable_restaurant, self._possible_recommendations = uer.pop_recommendation(self._possible_recommendations)
                 self.add_speech("I have found another restaurant that matches your requirements human! It is the '{}' restaurant. Would you like more information about this restaurant? Or am I done?".format(self._probable_restaurant))
-                self.set_state(9)
+                self.set_state(10)
                 return
             else:
                 self.add_speech("Human, would you like more information of the {} restaurant, or perhaps you want alternative restaurants?")
@@ -330,7 +330,17 @@ class FiniteStateMachine:
 
         elif self.get_state() == 11:  # TODO: Pre-terminal state; possibility to revert to state 2 here.
             dialog_act = self.classifier_handler(inp)
-
+            if dialog_act == "bye" or dialog_act == "thankyou":
+                self.add_speech("Alright human, I will now terminate. Did I perform amiably?")
+                self.set_state(12)
+                return
+            elif dialog_act == "restart":
+                self.add_speech("Alright. Let's start over, then. What type of food are you interested in?")
+                self.set_state(2)
+                return
+            else:
+                self.add_speech("Human, is my function hereby fullfilled, or do you want to start over?")
+                return
 
         elif self.get_state() == 12:  # Goodbye (terminate)
             self.add_speech("I am happy that I was able (or tried) to assist. Goodbye human.")
