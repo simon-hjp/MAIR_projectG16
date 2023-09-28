@@ -47,8 +47,8 @@ manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, configura
 print('Hi! Welcome to this automated restaurant')
 while not manager._terminated:
     print(manager._state)
-    print('>>>', end="")
-    inp = input()
+    # print('>>>', end="")
+    inp = input('>>>')
     out = manager.logic(inp)
     if manager._configuration['add_output_delay']:
         time.sleep(2)
