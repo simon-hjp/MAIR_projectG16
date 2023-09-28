@@ -2,6 +2,7 @@ import classifiers
 import utterance_extraction_recommendation as uer
 import levenshtein_spellchecking as ls
 import pandas as pd
+import time
 
 class FiniteStateMachine:
     def __init__(self, restaurant_data: pd.DataFrame, configuration: dict, classifier=None, startstate: int=0, endstate: int=18):
@@ -46,18 +47,28 @@ class FiniteStateMachine:
         if self.get_state() == 1:  # Hello
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "hello":
-                self.add_speech("Hello, human. I can help you find a restaurant based on your preferences. What kind of cuisine are you interested in?")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Hello, I can help you find a suitable restaurant for your needs. What kind of cuisine are you interested in?")
+                else:
+                    self.add_speech("Hello, human. I can help you find a restaurant based on your preferences. What kind of cuisine do you fancy?")
                 self.set_state(2)
                 return
             if dialog_act == "inform":
                 uid = uer.info_in_utterance(utterance=inp, df=self._restaurant_db)  # Utterance Information Dictionary
                 if uid["food"] == "":  # No valid food detected.
                     self._preferred_food = uid["food"]
-                    self.add_speech("I'm sorry, human. I could not understand what food type you preferred. Please state the type of cuisine you are interested in.")
+                    if self._configuration['informal_switch']:
+                        self.add_speech("I'm sorry. I could not understand what cuisine you want. "
+                                        "Let me know the type of cuisine you are interested in.")
+                    else:
+                        self.add_speech("I'm sorry, human. I could not understand what food type you preferred. Please "
+                                        "state the type of cuisine you are interested in.")
                     self.set_state(2)
                     return
                 if uid["food"] != "" and uid["food"] != ls.food_spellcheck(uid["food"], 3):  # Food likely misspelled
-                    self.add_speech("I could not find anything related to {}, are you perhaps interested in {}?".format(uid["food"], ls.food_spellcheck(uid["food"], 3)))
+
+                    self.add_speech("I could not find anything related to {}, are you perhaps interested in "
+                                        "{}?".format(uid["food"], ls.food_spellcheck(uid["food"], 3)))
                     self._probable_food = ls.food_spellcheck(uid["food"], 3)
                     self.set_state(3)
                     return
@@ -66,11 +77,19 @@ class FiniteStateMachine:
 
                 if uid["area"] == "":  # No valid area detected.
                     self._preferred_food = uid["food"]
-                    self.add_speech("I did understand that you are interested in {} cuisine, but could not understand what area you preferred. Please state the area you're interested in.".format(self._preferred_food))
+                    if self._configuration['informal_switch']:
+                        self.add_speech("Ok nice, {} cuisine is a great choice. I couldn't "
+                                        "understand what area you preferred tough. Please tell me the area you're "
+                                        "interested in.".format(self._preferred_food))
+                    else:
+                        self.add_speech("I did understand that you are interested in {} cuisine, but could "
+                                        "not understand what area you preferred. Please state the area you're "
+                                    "interested in.".format(self._preferred_food))
                     self.set_state(4)
                     return
                 if uid["area"] != "" and uid["area"] != ls.area_spellcheck(uid["area"], 3):  # Area likely misspelled
-                    self.add_speech("I could not find anything related to {}, are you perhaps interested in {}?".format(uid["area"], ls.area_spellcheck(uid["area"], 3)))
+                    self.add_speech("I could not find anything related to {}, are you perhaps interested in "
+                                    "{}?".format(uid["area"], ls.area_spellcheck(uid["area"], 3)))
                     self._probable_area = ls.area_spellcheck(uid["area"], 3)
                     self.set_state(5)
                     return
@@ -79,22 +98,36 @@ class FiniteStateMachine:
 
                 if uid["pricerange"] == "":  # No valid price range detected.
                     self._preferred_food = uid["food"]
-                    self.add_speech("I did understand you are interested in {} cuisine in the {} area, but could not understand what price range you preferred. Please state the price range you're looking for.".format(self._preferred_food, self._preferred_area))
+                    if self._configuration['informal_switch']:
+                        self.add_speech("I did understand you are interested in {} cuisine in the {} area, but could "
+                                        "not understand what price range you wanted. Please tell me the price range "
+                                        "you're looking for.".format(self._preferred_food, self._preferred_area))
+                    else:
+                        self.add_speech("I did understand you are interested in {} cuisine in the {} area, but could "
+                                        "not understand what price range you preferred. Please state the price range "
+                                        "you're looking for.".format(self._preferred_food, self._preferred_area))
                     self.set_state(6)
                     return
-                if uid["pricerange"] != "" and uid["pricerange"] != ls.pricerange_spellcheck(uid["pricerange"], 3):  # Price range likely misspelled
-                    self.add_speech("I could not find any price range to {}, are you perhaps interested in a {} price range?".format(uid["pricerange"], ls.pricerange_spellcheck(uid["pricerange"], 3)))
+                if uid["pricerange"] != "" and uid["pricerange"] != ls.pricerange_spellcheck(uid["pricerange"], 3):
+                    # Price range likely misspelled
+                    self.add_speech("I could not find any price range to {}, are you perhaps interested in a {} "
+                                        "price range?".format(uid["pricerange"], ls.pricerange_spellcheck(uid["pricerange"], 3)))
                     self._probable_pricerange = ls.pricerange_spellcheck(uid["pricerange"], 3)
                     self.set_state(7)
                     return
                 else:
                     self._preferred_pricerange = uid["pricerange"]
-
-                self.add_speech("Alright, I think I got all your preferences. Do you have any further requirements?")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Alright perfect! \nI think I got all your preferences, do you have any further requirements?")
+                else:
+                    self.add_speech("Alright human, I think I got all your preferences. Do you have any further requirements?")
                 self.set_state(8)
                 return
             else:
-                self.add_speech("I did not detect an intent to supply information, human. Please try again.")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Hmm, I'm not sure I understand what you meant. Could you please try explaining it differently?")
+                else:
+                    self.add_speech("I did not detect an intent to supply information, human. Please try again.")
                 self.set_state(1)
                 return
         
@@ -104,33 +137,54 @@ class FiniteStateMachine:
             if dialog_act == "inform":
                 uid = uer.info_in_utterance(utterance=inp, df=self._restaurant_db)  # Utterance Information Dictionary
                 if uid["food"] == "":  # No valid food detected.
-                    self.add_speech("I'm sorry, human. I could not understand what food type you preferred. Please state the type of cuisine you are interested in.")
+                    if self._configuration['informal_switch']:
+                        self.add_speech("I couldn't catch that. What type of cuisine are you in the mood for?"
+                                        " Feel free to tell me again!")
+                    else:
+                        self.add_speech("I'm sorry, human. I could not understand what food type you preferred. Please "
+                                        "state the type of cuisine you are interested in.")
                     self.set_state(2)
                     return
                 elif uid["food"] == "dontcare":
                     self._preferred_food = uid["food"]
-                    self.add_speech("You have stated that you have no preference at all for the cuisine type of the restaurant, human. What area are you interested in?")
+                    if self._configuration['informal_switch']:
+                        self.add_speech("Ok you have stated that you have no preference at all for the cuisine. What area are you interested in?")
+                    else:
+                        self.add_speech("You have stated that you have no preference at all for the cuisine type of the "
+                                        "restaurant, human. What area are you interested in?")
                     self.set_state(4)
                     return
                 elif uid["food"] != ls.food_spellcheck(uid["food"], 3):
-                    self.add_speech("I could not find any food related to {}, are you perhaps interested in {} cuisine?".format(uid["food"], ls.food_spellcheck(uid["food"], 3)))
+                    self.add_speech("I could not find any food related to {}, are you perhaps interested in {} "
+                                    "cuisine?".format(uid["food"], ls.food_spellcheck(uid["food"], 3)))
                     self._probable_food = ls.food_spellcheck(uid["food"], 3)
                     self.set_state(3)
                     return
                 elif uid["food"] != "" and uid["food"] == ls.food_spellcheck(uid["food"], 3):
                     self._preferred_food = uid["food"]
-                    self.add_speech("I understood that you are interested in {} cuisine, what area are you looking for?".format(self._preferred_food))
+                    self.add_speech("I understood that you are interested in {} cuisine, what area are you "
+                                        "looking for?".format(self._preferred_food))
                     self.set_state(4)
                     return
                 else:
-                    self.add_speech("Sorry, human. I did not understand what you meant. Can you please clarify what kind of food you are looking for?")
+                    if self._configuration['informal_switch']:
+                        self.add_speech("I'm so sorry! I did not understand what you meant. Can you please clarify "
+                                        "what kind of food you are looking for?")
+                    else:
+                        self.add_speech("Sorry, human. I did not understand what you meant. Can you please clarify "
+                                        "what kind of food you are looking for?")
                     return
             elif dialog_act == "restart":
                 self.add_speech("Alright. Let's start over, then. What type of food are you interested in?")
                 self.set_state(2)
                 return
             else:
-                self.add_speech("Human, please state the type of food you are interested in. Or, if you want, we can start over.")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Ok, please state the type of food you are interested in. "
+                                    "Or, if you want, we can just restart the process.")
+                else:
+                    self.add_speech("Human, please state the type of food you are interested in. "
+                                    "Or, if you prefer, we can start over.")
                 return
 
         elif self.get_state() == 3:  # Food spelling check
@@ -139,11 +193,19 @@ class FiniteStateMachine:
             if dialog_act == "ack" or dialog_act == "affirm" or dialog_act == "confirm":
                 self._preferred_food = self._probable_food
                 self._probable_food = ""
-                self.add_speech("Very well, you are interested in {} cuisine. What area are you looking for?".format(self._preferred_food))
+                if self._configuration['informal_switch']:
+                    self.add_speech("Ok nice, you are interested in {} cuisine. What area are you "
+                                    "looking for?".format(self._preferred_food))
+                else:
+                    self.add_speech("Very well, you are interested in {} cuisine. What area are you "
+                                    "looking for?".format(self._preferred_food))
                 self.set_state(4)
                 return
             elif dialog_act == "negate" or dialog_act == "deny":
-                self.add_speech("Okay. Would you like to state again what cuisine you are interested in?")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Okay. Could you tell me again what cuisine you are interested in?")
+                else:
+                    self.add_speech("Okay. Would you like to state again what cuisine you are interested in?")
                 self.set_state(2)
                 return
             elif dialog_act == "restart":
@@ -151,42 +213,65 @@ class FiniteStateMachine:
                 self.set_state(2)
                 return
             else:
-                self.add_speech("Is my recommendation correct human? Or would you perhaps like to start over?")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Is my recommendation good? Or would you like to start over?")
+                else:
+                    self.add_speech("Is my recommendation correct human? Or would you perhaps like to start over?")
                 return
-
-
         elif self.get_state() == 4:  # Ask for area preference
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "inform":
                 uid = uer.info_in_utterance(utterance=inp, df=self._restaurant_db)  # Utterance Information Dictionary
                 if uid["area"] == "":  # No valid area detected.
-                    self.add_speech("I'm sorry, human. I could not understand what area you preferred. Please state the area in which you want to find a restaurant.")
+                    if self._configuration['informal_switch']:
+                        self.add_speech("I'm sorry. I could not understand what area you preferred. Please state"
+                                        " the area you'd like your restaurant to be in.")
+                    else:
+                        self.add_speech("I'm sorry, human. I could not understand what area you preferred. Please state"
+                                        " the area in which you want to find a restaurant.")
                     self.set_state(4)
                     return
                 if uid["area"] == "dontcare":  # No valid area detected.
                     self._preferred_area = uid["area"]
-                    self.add_speech("You have stated that you have no preference at all for the restaurant's area, human. What price range are you interested in?".format(self._preferred_food))
+                    if self._configuration['informal_switch']:
+                        self.add_speech("You have stated that you have no preference at all for the restaurant's area. "
+                                        "But what price range are you interested in?".format(self._preferred_food))
+                    else:
+                        self.add_speech("You have stated that you have no preference at all for the restaurant's area, "
+                                        "human. What price range are you interested in?".format(self._preferred_food))
                     self.set_state(6)
                     return
                 elif uid["area"] != ls.area_spellcheck(uid["area"], 3):
-                    self.add_speech("I could not find any area related to {}, are you perhaps interested in the {} area?".format(uid["area"], ls.area_spellcheck(uid["area"], 3)))
+                    self.add_speech("I could not find any area related to {}, are you perhaps interested in the {} "
+                                        "area?".format(uid["area"], ls.area_spellcheck(uid["area"], 3)))
                     self._probable_area = ls.area_spellcheck(uid["area"], 3)
                     self.set_state(5)
                     return
                 elif uid["area"] != "" and uid["area"] == ls.area_spellcheck(uid["area"], 3):
                     self._preferred_area = uid["area"]
-                    self.add_speech("I understood that you are interested in restaurants in the {} area, what price range are you looking for?".format(uid["area"]))
+                    self.add_speech("I understood that you are interested in restaurants in the {} area, what price"
+                                        " range are you looking for?".format(uid["area"]))
                     self.set_state(6)
                     return
                 else:
-                    self.add_speech("Sorry, human. I did not understand what you meant. Would you clarify what kind of area you are interested in?")
+                    if self._configuration['informal_switch']:
+                        self.add_speech("I'm Sorry. I did not understand what you meant. Could you please clarify what "
+                                        "kind of area you are interested in?")
+                    else:
+                        self.add_speech("Sorry, human. I did not understand what you meant. Would you clarify what kind"
+                                        " of area you are interested in?")
                     return
             elif dialog_act == "restart":
                 self.add_speech("Alright. Let's start over, then. What type of food are you interested in?")
                 self.set_state(2)
                 return
             else:
-                self.add_speech("Human, please state the area you are interested in. Or, if you want, we can start over.")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Ok then, please state the area you are interested in! "
+                                    "Or, if you want, we can just start over.")
+                else:
+                    self.add_speech("Human, please state the area you are interested in. "
+                                    "Or, if you prefer, we can start over.")
                 return
 
         elif self.get_state() == 5:  # Suggest spelling (area)
@@ -194,7 +279,8 @@ class FiniteStateMachine:
             if dialog_act == "ack" or dialog_act == "affirm" or dialog_act == "confirm":
                 self._preferred_area = self._probable_area
                 self._probable_area = ""
-                self.add_speech("Very well, you are interested in a restaurant in the {} area. What price range are you interested in?".format(self._preferred_area))
+                self.add_speech("Very well, you are interested in a restaurant in the {} area. "
+                                    "What price range are you interested in?".format(self._preferred_area))
                 self.set_state(6)
                 return
             elif dialog_act == "negate" or dialog_act == "deny":
@@ -206,7 +292,12 @@ class FiniteStateMachine:
                 self.set_state(2)
                 return
             else:
-                self.add_speech("Is my recommendation correct human? Or would you perhaps like to start over completely?")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Is my recommendation good? "
+                                    "Or would you just like to start over?")
+                else:
+                    self.add_speech("Is my recommendation correct human? "
+                                    "Or would you perhaps like to start over completely?")
                 return
 
         elif self.get_state() == 6:  # Ask for pricerange preference
@@ -214,32 +305,54 @@ class FiniteStateMachine:
             if dialog_act == "inform":
                 uid = uer.info_in_utterance(utterance=inp, df=self._restaurant_db)  # Utterance Information Dictionary
                 if uid["pricerange"] == "":  # No valid area detected.
-                    self.add_speech("I'm sorry, human. I could not understand what price range you preferred. Please state the price range of restaurants you are interested in.")
+                    if self._configuration['informal_switch']:
+                        self.add_speech("I'm sorry but I couldn't understand what price range you preferred. "
+                                        "Please rephrase and tell me again the price range you're interested in.")
+                    else:
+                        self.add_speech("I'm sorry, human. I could not understand what price range you preferred. "
+                                        "Please state the price range of restaurants you are interested in.")
                     self.set_state(6)
                     return
                 if uid["pricerange"] == "dontcare":
                     self._preferred_pricerange = uid["pricerange"]
-                    self.add_speech("You have stated that you have no preference at all for the price of the restaurant, human. Do you have any further requirements?")
+                    if self._configuration['informal_switch']:
+                        self.add_speech("You've said that you have no preference at all for the price "
+                                        "of the restaurant. Do you have any further requirements?")
+                    else:
+                        self.add_speech("You have stated that you have no preference at all for the price "
+                                        "of the restaurant, human. Do you have any further requirements?")
                     self.set_state(8)
                     return
                 elif uid["pricerange"] != ls.pricerange_spellcheck(uid["pricerange"], 3):
-                    self.add_speech("I could not find any {} price range, are you perhaps interested in a {} restaurant?".format(uid["pricerange"], ls.food_spellcheck(uid["pricerange"], 3)))
+                    self.add_speech("I could not find any {} price range, are you perhaps interested in a {} "
+                                        "restaurant?".format(uid["pricerange"], ls.food_spellcheck(uid["pricerange"], 3)))
                     self.set_state(7)
                     return
                 elif uid["pricerange"] != "" and uid["pricerange"] == ls.pricerange_spellcheck(uid["pricerange"], 3):
                     self._preferred_pricerange = uid["pricerange"]
-                    self.add_speech("I understood that you are interested in a {} restaurant. Do you have any further requirements?".format(self._preferred_pricerange))
+                    self.add_speech("I understood that you are interested in a {} restaurant. Do you have any "
+                                        "further requirements?".format(self._preferred_pricerange))
                     self.set_state(8)
                     return
                 else:
-                    self.add_speech("Sorry, human. I did not understand what you meant. Would you clarify what kind of price range you are looking for?")
+                    if self._configuration['informal_switch']:
+                        self.add_speech("Sorry, I did not understand what you meant. Could you clarify "
+                                        "what kind of price range you are looking for?")
+                    else:
+                        self.add_speech("Sorry, human. I did not understand what you meant. Would you clarify "
+                                        "what kind of price range you are looking for?")
                     return
             elif dialog_act == "restart":
                 self.add_speech("Alright. Let's start over, then. What type of food are you interested in?")
                 self.set_state(2)
                 return
             else:
-                self.add_speech("Human, please state the price range you are looking for. Or, if you want, we can start over.")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Please tell me the price range you are looking for. "
+                                    "Or, if you want, we can start over.")
+                else:
+                    self.add_speech("Human, please state the price range you are looking for. "
+                                    "Or, if you want, we can start over.")
                 return
 
         elif self.get_state() == 7:  # Spelling check (pricerange)
@@ -247,12 +360,13 @@ class FiniteStateMachine:
             if dialog_act == "ack" or dialog_act == "affirm" or dialog_act == "confirm":
                 self._preferred_pricerange = self._probable_pricerange
                 self._probable_pricerange = ""
-                self.add_speech("Very well, I understood that you are interested in a {} restaurant. Do you have any further requirements?".format(self._preferred_pricerange))
+                self.add_speech("Allright, I understood that you are interested in a {} restaurant. "
+                                    "Do you have any further requirements?".format(self._preferred_pricerange))
                 self.set_state(8)
                 return
             elif dialog_act == "negate" or dialog_act == "deny":
                 self._probable_pricerange = ""
-                self.add_speech("Okay. Would you like to state again what price range you are interested in?")
+                self.add_speech("Okay. Could you rephrase what price range you are interested in?")
                 self.set_state(6)
                 return
             elif dialog_act == "restart":
@@ -261,9 +375,11 @@ class FiniteStateMachine:
                 self.set_state(2)
                 return
             else:
-                self.add_speech("Is my recommendation correct human? Or would you perhaps like to start over?")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Are my recommendation good? Or would you like to start over?")
+                else:
+                    self.add_speech("Are my recommendation correct human? Or would you perhaps like to start over?")
                 return
-            
         elif self.get_state() == 8:  # Additional requests
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "inform":
@@ -272,7 +388,8 @@ class FiniteStateMachine:
             elif dialog_act == "restart":
                 self.add_speech("Alright. Let's start over, then. What type of food are you interested in?")
                 self.set_state(2)
-            elif dialog_act == "negate" or dialog_act == "deny":  # This is gonna be the only place where we mention *everything* now.
+            elif dialog_act == "negate" or dialog_act == "deny":
+                # This is going to be the only place where we mention *everything* now.
                 # Format user preferences for string.
                 if self._preferred_food == "dontcare":
                     self._represent_string_food = "any cuisine"
@@ -286,12 +403,21 @@ class FiniteStateMachine:
                     self._represent_string_pricerange = "any price range"
                 else:
                     self._represent_string_pricerange = self._preferred_pricerange + " " + "price range"  # type: ignore
-                self.add_speech("Alright. I understand that you are interested in a {}, {} restaurant in {} area with the following requirements: {}. Is that correct?".format(self._represent_string_pricerange, self._represent_string_food, self._represent_string_area, self._additional_requirements))
+                self.add_speech("Alright. I understand that you are interested in a {}, {} restaurant in {} area "
+                                "with the following requirements: {}. "
+                                "Is that correct?".format(self._represent_string_pricerange,
+                                                          self._represent_string_food,
+                                                          self._represent_string_area,
+                                                          self._additional_requirements))
                 self.set_state(9)
                 return
             else:
-                self.add_speech("Human, do you have any (additional) requirements for the restaurant? Or would you like to start over?")
-
+                if self._configuration['informal_switch']:
+                    self.add_speech("Allright, do you have any additional requirements for the restaurant? "
+                                    "Or would you like to start over?")
+                else:
+                    self.add_speech("Human, do you have any (additional) requirements for the restaurant? "
+                                    "Or would you like to start over?")
         elif self.get_state() == 9:  # Suggest restaurant
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "ack" or dialog_act == "affirm" or dialog_act == "confirm":
@@ -299,11 +425,23 @@ class FiniteStateMachine:
                 self._possible_recommendations = uer.provide_recommendations(self._restaurant_db, self._preferred_food, self._preferred_pricerange, self._preferred_area) # type: ignore
                 if self._possible_recommendations.shape[0] >= 1:  # Found a restaurant!
                     self._probable_restaurant, self._possible_recommendations = uer.pop_recommendation(self._possible_recommendations)
-                    self.add_speech(f"I have found a restaurant that matches your requirements human! It is the '{self._probable_restaurant}' restaurant. Would you like more information?")
+                    if self._configuration['informal_switch']:
+                        self.add_speech(f"Ok great, I have found a restaurant that matches your requirements! "
+                                        f"It is the '{self._probable_restaurant}' restaurant. "
+                                        f"Would you like more information?")
+                    else:
+                        self.add_speech(f"I have found a restaurant that matches your exact requirements human! "
+                                    f"It is the '{self._probable_restaurant}' restaurant. "
+                                    f"Would you like additional information?")
                     self.set_state(10)
                     return
                 else:  # Didn't find a restaurant
-                    self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. Would you like to start over or is my function fullfilled?")
+                    if self._configuration['informal_switch']:
+                        self.add_speech("I'm sorry. I did not find a restaurant which matches your requirements."
+                            " Would you like to start over or quit the program?")
+                    else:
+                        self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements."
+                                        " Would you like to start over or is my function fulfilled?")
                     self.set_state(11)
                     return
             elif dialog_act == "negate" or dialog_act == "deny":
@@ -311,37 +449,76 @@ class FiniteStateMachine:
                 self.set_state(2)
                 return
             else:
-                self.add_speech("Human, are you correctly looking for a {}, {} restaurant in {} area with the following requirements: {}?".format(self._represent_string_pricerange, self._represent_string_food, self._represent_string_area, self._additional_requirements))
+                if self._configuration['informal_switch']:
+                    self.add_speech("Am I correct that you're looking for a {}, {} restaurant in {} area "
+                                    "with the following requirements: {}?".format(self._represent_string_pricerange,
+                                                                                  self._represent_string_food,
+                                                                                  self._represent_string_area,
+                                                                                  self._additional_requirements))
+                else:
+                    self.add_speech("Human, are you correctly looking for a {}, {} restaurant in {} area "
+                                    "with the following requirements: {}?".format(self._represent_string_pricerange,
+                                                                              self._represent_string_food,
+                                                                              self._represent_string_area,
+                                                                              self._additional_requirements))
                 return
 
         elif self.get_state() == 10:  # Give information
             dialog_act = self.classifier_handler(inp)   
             if dialog_act == "reqmore":
-                info_dict = uer.get_restaurant_info(restaurants_df=self._restaurant_db, restaurantname=self._probable_restaurant)  # type: ignore
+                info_dict = uer.get_restaurant_info(restaurants_df=self._restaurant_db,
+                                                    restaurantname=self._probable_restaurant)  # type: ignore
                 self.add_speech("Here's some information:")
                 self.add_speech(f"Address: {info_dict['address']}")  # type: ignore
                 self.add_speech(f"Phone number: {info_dict['phone']}")  # type: ignore
                 self.add_speech(f"Zipcode: {info_dict['postcode']}")
-                self.add_speech("Is there anything else I can be of assistance with? Can I perhaps provide the same information again, or is our conversation finished?")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Is there anything else I can help you with? Or is our conversation over?")
+                else:
+                    self.add_speech("Is there anything else I can be of assistance with? "
+                                    "Can I perhaps provide the same information again, or is our conversation finished?")
                 return
             elif dialog_act == "reqalts":
-                self.add_speech("Not interested in this restaurant? Okay, let me see if I can find an alternative.")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Not interested in this restaurant? Okay, let me see if I can find something else.")
+                else:
+                    self.add_speech("Not interested in this restaurant? Okay human, let me see if I can find an alternative.")
                 if len(self._possible_recommendations) < 1:
-                    self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. Would you like to start over or is my function fullfilled?")
+                    if self._configuration['informal_switch']:
+                        self.add_speech("I'm sorry I did not find a restaurant which matches your "
+                                        "requirements. Would you like to start over or quit?")
+                    else:
+                        self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given "
+                                        "requirements. Would you like to start over or is my function fullfilled?")
                     self.set_state(11)
                     return
                 self._probable_restaurant, self._possible_recommendations = uer.pop_recommendation(self._possible_recommendations)
-                self.add_speech("I have found another restaurant that matches your requirements human! It is the '{}' restaurant. Would you like more information about this restaurant? Or am I done?".format(self._probable_restaurant))
+                if self._configuration['informal_switch']:
+                    self.add_speech("I have found another restaurant that matches your requirements! "
+                                    "It is the '{}' restaurant. Would you like more information about this "
+                                    "restaurant?".format(self._probable_restaurant))
+                else:
+                    self.add_speech("I have found another restaurant that matches your requirements human! "
+                                    "It is the '{}' restaurant. Would you like more information about this "
+                                    "restaurant? Or am I done?".format(self._probable_restaurant))
                 self.set_state(10)
                 return
             else:
-                self.add_speech("Human, would you like more information of the {} restaurant, or perhaps you want alternative restaurants?")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Would you like more information about the {} restaurant, "
+                                    "or maybe you want alternative restaurants?")
+                else:
+                    self.add_speech("Human, would you like more information about the {} restaurant, "
+                                    "or perhaps you want alternative restaurants?")
                 return
 
         elif self.get_state() == 11:  # TODO: Pre-terminal state; possibility to revert to state 2 here.
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "bye" or dialog_act == "thankyou":
-                self.add_speech("Alright human, I will now terminate. Did I perform amiably?")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Alright, I will now close. I hope I was useful!")
+                else:
+                    self.add_speech("Alright human, I will now terminate. Did I perform amiably?")
                 self.set_state(12)
                 return
             elif dialog_act == "restart":
@@ -349,11 +526,17 @@ class FiniteStateMachine:
                 self.set_state(2)
                 return
             else:
-                self.add_speech("Human, is my function hereby fullfilled, or do you want to start over?")
+                if self._configuration['informal_switch']:
+                    self.add_speech("Are we finished or would you want to take another go?")
+                else:
+                    self.add_speech("Human, is my function hereby fulfilled, or do you want to start over?")
                 return
 
         elif self.get_state() == 12:  # Goodbye (terminate)
-            self.add_speech("I am happy that I was able (or tried) to assist. Goodbye human.")
+            if self._configuration['informal_switch']:
+                self.add_speech("Good to hear I was able to assist. Goodbye.")
+            else:
+                self.add_speech("I am happy that I was able (or tried) to assist. Goodbye human.")
             self._terminated = True
     
     def classifier_handler(self, inp: str):

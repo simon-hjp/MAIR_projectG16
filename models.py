@@ -123,8 +123,10 @@ def create_models(data_dir):
 
     # decision tree without duplicates
     dt_classifier_dd = cl.DialogActsClassifier(name="Decision tree without duplicates")
-    dt_classifier_dd.train(df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"],
-                           hyperparams_dict=dt_params)
+    dt_classifier_dd.train(df_train_deduplicated["utterance_content"],
+                           df_train_deduplicated["dialog_act"],
+                           hyperparams_dict=dt_params
+                           )
     tc.evaluate_model(dt_classifier_dd, df_test_deduplicated)
 
     # logistic regression

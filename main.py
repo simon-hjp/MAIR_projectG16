@@ -1,9 +1,6 @@
 import text_classification
 import classifiers
-import models
 import fsm_statemanager as fsm
-import utterance_extraction_recommendation as uer
-import levenshtein_spellchecking as ls
 import pandas as pd
 import numpy as np
 import time
@@ -13,7 +10,8 @@ configuration_dict = {
     'spellchecking': True,  # this could be something else too, turning spellchecking off might be easy to implement though
     'use_rulebaseline': True,
     'output_all_caps': False,
-    'add_output_delay': False
+    'add_output_delay': 3,
+    'informal_switch': True
 }
 
 # data imports
@@ -50,5 +48,5 @@ while not manager._terminated:
     inp = input('>>>')
     out = manager.logic(inp)
     if manager._configuration['add_output_delay']:
-        time.sleep(2)
+        time.sleep(manager._configuration['add_output_delay'])
     print(out)

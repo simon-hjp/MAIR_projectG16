@@ -24,9 +24,7 @@ def import_data(data_dir: str, drop_duplicates=False):
     df["Datapoint"] = df["Datapoint"].str.lower()
 
     # split rows into labels and utterances
-    df[["dialog_act", "utterance_content"]] = df["Datapoint"].str.split(
-        pat=" ", n=1, expand=True
-    )
+    df[["dialog_act", "utterance_content"]] = df["Datapoint"].str.split(pat=" ", n=1, expand=True)
     df.drop("Datapoint", axis=1, inplace=True)
 
     if drop_duplicates:
