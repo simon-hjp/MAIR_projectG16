@@ -10,7 +10,7 @@ class FiniteStateMachine:
         self._end = endstate
         self._configuration = configuration
         self._storedstring = ""  # String to output to user.
-        if classifier == None:
+        if classifier == None or self._configuration['use_rulebaseline']:
             self._classifier = classifiers.RuleBaselineClassifier()  # The output of the function must be a dialog_act as in a string!
         else:
             self._classifier = classifier # classifier needs to be trained beforehand
@@ -224,14 +224,14 @@ class FiniteStateMachine:
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "ack" or dialog_act == "affirm" or dialog_act == "confirm":
                 # do something to get restaurant.
-                rec, rest_df = uer.provide_recommendations(self._restaurant_db, self._preferred_food, self._preferred_pricerange, self._preferred_area) # type: ignore
-                self._possible_recommendations = rest_df
-                if rec != "No restaurant":  # Found a restaurant!
-                    self._probable_restaurant = rec
+                recommendations = uer.provide_recommendations(self._restaurant_db, self._preferred_food, self._preferred_pricerange, self._preferred_area) # type: ignore
+                self._possible_recommendations = recommendations
+                if self._possible_recommendations.shape[0] >= 1:  # Found a restaurant!
+                    self._probable_restaurant, self._possible_recommendations = uer.pop_recommendation(self._possible_recommendations)
                     self.add_speech("I have found a restaurant that matches your requirements human! It is the '{}' restaurant. Would you like more information?".format(self._probable_restaurant))
                     self.set_state(9)
                     return
-                elif rec == "No restaurant":  # Didn't find a restaurant
+                elif self._possible_recommendations.shape[0] < 1:  # Didn't find a restaurant
                     self.add_speech("I'm sorry, human. I did not find a restaurant which matches the given requirements. I will now terminate.")
                     self.set_state(10)
                     return
@@ -260,9 +260,7 @@ class FiniteStateMachine:
                     self.add_speech("I'm sorry, human. I did not find another restaurant which matches the given requirements. I will now terminate.")
                     self.set_state(10)
                     return
-                tmp = self._possible_recommendations.sample(n=1)
-                self._probable_restaurant = tmp["restaurantname"].iloc[0]
-                self._possible_recommendations = self._possible_recommendations.drop(tmp.index)
+                self._probable_restaurant, self._possible_recommendations = uer.pop_recommendation(self._possible_recommendations)
                 self.add_speech("I have found another restaurant that matches your requirements human! It is the '{}' restaurant. Would you like more information about this restaurant? Or am I done?".format(self._probable_restaurant))
                 self.set_state(9)
                 return

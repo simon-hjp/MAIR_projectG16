@@ -10,10 +10,10 @@ import time
 
 # Dictionary containing the configuration values
 configuration_dict = {
-    'spell_checking': True,
-    'ask_spell_checking_confirmation': True,
-    'output_all_caps': True,
-    'add_output_delay': True
+    'spellchecking': True,  # this could be something else too, turning spellchecking off might be easy to implement though
+    'use_rulebaseline': True,
+    'output_all_caps': False,
+    'add_output_delay': False
 }
 
 # data imports
@@ -32,12 +32,19 @@ restaurants_database['length_stay'] = np.random.choice(length_stay_vals, restaur
 classifiers.label_encoder.fit(dialog_training_df["dialog_act"])
 classifiers.vectorizer.fit(dialog_training_df["utterance_content"])
 
-classifier = classifiers.FeedForwardNeuralNetworkClassifier()
-# this classifier is already deduplicated since the duplications have been removed when the data was retrieved
-classifier.train(x_train=dialog_training_df["utterance_content"], y_train=dialog_training_df["dialog_act"],)
+if configuration_dict['use_rulebaseline']:
+    classifier = classifiers.RuleBaselineClassifier()
+else:
+    classifier = classifiers.FeedForwardNeuralNetworkClassifier()
+    print('Training classifier...')
+    # this classifier is already deduplicated since the duplications have been removed when the data was retrieved
+    classifier.train(x_train=dialog_training_df["utterance_content"], y_train=dialog_training_df["dialog_act"])
+    print('Classifier is ready.')
 
 # initialize dialog agent
 manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, configuration=configuration_dict, classifier=classifier, startstate=1)
+# print welcome message
+print('Hi! Welcome to this automated restaurant')
 while not manager._terminated:
     print(manager._state)
     print('>>>', end="")

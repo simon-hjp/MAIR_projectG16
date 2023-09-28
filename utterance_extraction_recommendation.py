@@ -66,7 +66,7 @@ def info_in_utterance(utterance: str, df: pd.DataFrame):
     
     return {'food': food, 'area': area, 'pricerange': pricerange, 'preference': preference}
 
-def provide_recommendations(restaurants_df: pd.DataFrame, req_food="", req_pricerange="", req_area="") -> tuple[str, pd.DataFrame]:
+def provide_recommendations(restaurants_df: pd.DataFrame, req_food="", req_pricerange="", req_area="") -> pd.DataFrame:
     """Return a restaurant recommendation based on the requested attributes by the user. If a preference 
     """
     possible_recs = restaurants_df.copy()
@@ -76,12 +76,8 @@ def provide_recommendations(restaurants_df: pd.DataFrame, req_food="", req_price
         possible_recs = possible_recs[possible_recs["pricerange"]==req_pricerange]
     if req_area != "":
         possible_recs = possible_recs[possible_recs["area"]==req_area]
-    print(possible_recs)
-    if len(possible_recs) < 1:
-        return "No restaurant", possible_recs
-    recommendation = possible_recs.sample(n=1, random_state=5)
-    possible_recs.drop(recommendation.index, inplace=True)
-    return recommendation["restaurantname"].iloc[0], possible_recs
+    # print(possible_recs)
+    return possible_recs
 
 def preference_reasoning(rec_rests: pd.DataFrame, req_consequent: str) -> tuple[pd.DataFrame, str]:
     """Reason about restaurants that could be recommended whether they satisfy the 
@@ -112,7 +108,7 @@ def preference_reasoning(rec_rests: pd.DataFrame, req_consequent: str) -> tuple[
         return rec_rests, 'This restaurant is not romantic because it is busy.'
     return rec_rests, 'This restaurant should be fine.'
 
-def provide_alternative(recommendations: pd.DataFrame):
+def pop_recommendation(recommendations: pd.DataFrame):
     if len(recommendations) < 1:
         return "no alternative possible", recommendations
     alternative_recommendation = recommendations.sample(n=1, random_state=5).iloc[0]
