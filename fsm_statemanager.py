@@ -818,9 +818,7 @@ class FiniteStateMachine:
                     )
                 return
 
-        elif (
-            self.get_state() == 11
-        ):  # TODO: Pre-terminal state; possibility to revert to state 2 here.
+        elif( self.get_state() == 11):
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "bye" or dialog_act == "thankyou":
                 if self._configuration["informal_switch"]:

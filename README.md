@@ -49,6 +49,8 @@ Here are all the libraries used in this project:
 
 - **pandas**: 
 Pandas is a powerful data manipulation and analysis library that simplifies working with structured data.
+- **pickle**: 
+Pickle is a simple library that turns any object into raw data so it can be used later.
 - **numpy**: 
 NumPy is a fundamental library for numerical computing, enabling efficient operations on arrays and matrices.
 - **scikit-learn**: 
