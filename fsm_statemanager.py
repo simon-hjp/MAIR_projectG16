@@ -48,9 +48,11 @@ class FiniteStateMachine:
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "hello":
                 if self._configuration['informal_switch']:
-                    self.add_speech("Hello, I can help you find a suitable restaurant for your needs. What kind of cuisine are you interested in?")
+                    self.add_speech("Hello, I can help you find a suitable restaurant for your needs. \n"
+                                    "Tell me, What kind of cuisine are you interested in?")
                 else:
-                    self.add_speech("Hello, human. I can help you find a restaurant based on your preferences. What kind of cuisine do you fancy?")
+                    self.add_speech("Hello, human. I can help you find a restaurant based on your preferences. \n"
+                                    "Tell me, what kind of cuisine do you fancy?")
                 self.set_state(2)
                 return
             if dialog_act == "inform":
