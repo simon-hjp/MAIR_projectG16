@@ -70,11 +70,11 @@ def provide_recommendations(restaurants_df: pd.DataFrame, req_food="", req_price
     """Return a restaurant recommendation based on the requested attributes by the user. If a preference 
     """
     possible_recs = restaurants_df.copy()
-    if req_food != "":
+    if req_food not in ["", "dontcare"]:
         possible_recs = possible_recs[possible_recs["food"]==req_food]
-    if req_pricerange != "":
+    if req_pricerange not in ["", "dontcare"]:
         possible_recs = possible_recs[possible_recs["pricerange"]==req_pricerange]
-    if req_area != "":
+    if req_area not in ["", "dontcare"]:
         possible_recs = possible_recs[possible_recs["area"]==req_area]
     # print(possible_recs)
     return possible_recs
