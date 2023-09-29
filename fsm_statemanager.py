@@ -405,7 +405,7 @@ class FiniteStateMachine:
                     self._represent_string_pricerange = "any price range"
                 else:
                     self._represent_string_pricerange = self._preferred_pricerange + " " + "price range"  # type: ignore
-                self.add_speech("Alright. I understand that you are interested in a {}, {} restaurant in {} area "
+                self.add_speech("All right. I understand that you are interested in a {}, {} restaurant in {} area "
                                 "with the following requirements: {}. "
                                 "Is that correct?".format(self._represent_string_pricerange,
                                                           self._represent_string_food,
@@ -415,7 +415,7 @@ class FiniteStateMachine:
                 return
             else:
                 if self._configuration['informal_switch']:
-                    self.add_speech("Allright, do you have any additional requirements for the restaurant? "
+                    self.add_speech("All right, do you have any additional requirements for the restaurant? "
                                     "Or would you like to start over?")
                 else:
                     self.add_speech("Human, do you have any (additional) requirements for the restaurant? "
@@ -471,8 +471,8 @@ class FiniteStateMachine:
                 info_dict = uer.get_restaurant_info(restaurants_df=self._restaurant_db,
                                                     restaurantname=self._probable_restaurant)  # type: ignore
                 self.add_speech("Here's some information:")
-                self.add_speech(f"Address: {info_dict['address']}")  # type: ignore
-                self.add_speech(f"Phone number: {info_dict['phone']}")  # type: ignore
+                self.add_speech(f"Address: {info_dict['addr']}")
+                self.add_speech(f"Phone number: {info_dict['phone']}")
                 self.add_speech(f"Zipcode: {info_dict['postcode']}")
                 if self._configuration['informal_switch']:
                     self.add_speech("Is there anything else I can help you with? Or is our conversation over?")
@@ -507,10 +507,10 @@ class FiniteStateMachine:
                 return
             else:
                 if self._configuration['informal_switch']:
-                    self.add_speech("Would you like more information about the {} restaurant, "
+                    self.add_speech(f"Would you like more information about the {self._probable_restaurant} restaurant, "
                                     "or maybe you want alternative restaurants?")
                 else:
-                    self.add_speech("Human, would you like more information about the {} restaurant, "
+                    self.add_speech(f"Human, would you like more information about the {self._probable_restaurant} restaurant, "
                                     "or perhaps you want alternative restaurants?")
                 return
 

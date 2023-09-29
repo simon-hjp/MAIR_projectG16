@@ -143,7 +143,8 @@ def test_uer():
         info_dict = info_in_utterance(utterance, restaurant_data)
         recommendation, alternatives = provide_recommendations(restaurants_df=restaurant_data, req_food=info_dict["food"], req_area=info_dict["area"], req_pricerange=info_dict["pricerange"])
         print("Recommended restaurant:", recommendation)
-        print("Recommendation info:", get_restaurant_info(restaurant_data, recommendation))
+        print("Recommendation info:", get_restaurant_info(restaurant_data, recommendation))  # type: ignore
+        print('Alternatives dataframe:', alternatives)
 
         # further refine recommendation based on user preference
         preference = input('Do you have an additional preference?\n')

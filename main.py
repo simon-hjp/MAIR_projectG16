@@ -4,15 +4,16 @@ import fsm_statemanager as fsm
 import pandas as pd
 import numpy as np
 import time
+
+
 def dialog_system():
     # Dictionary containing the configuration values
     configuration_dict = {
-        'spellchecking': True,  # this could be something else too, turning spellchecking off might be easy to implement though
         'use_rulebaseline': True,
         'output_all_caps': False,
-        'add_output_delay': 3,
+        'add_output_delay': 0,
         'informal_switch': True,
-        'display_state_number': False
+        'display_state_number': False  # only used for testing, not experimenting.
     }
 
     # data imports
