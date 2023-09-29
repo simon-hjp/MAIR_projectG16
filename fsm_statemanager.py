@@ -19,7 +19,7 @@ class FiniteStateMachine:
         self._end = endstate
         self._configuration = configuration
         self._storedstring = ""  # String to output to user.
-        if classifier == None or self._configuration["use_rulebaseline"]:
+        if classifier == None:
             self._classifier = (
                 classifiers.RuleBaselineClassifier()
             )  # The output of the function must be a dialog_act as in a string!

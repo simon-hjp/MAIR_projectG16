@@ -243,14 +243,13 @@ class FeedForwardNeuralNetworkClassifier:
 
     def predict(self, utterance):
         """Predict dialog acts for test data."""
-        # make
         utterance_bow = vectorizer.transform(utterance)
         return self.model.predict(utterance_bow)
 
     def predict_act(self, utterance):
         """Predict the dialog act of a single utterance"""
 
-        # Predict the dialog act using the trained logistic regression model
+        # Predict the dialog act
         predicted_label_encoded = self.predict([utterance])
 
         # Decode the predicted label

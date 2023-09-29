@@ -4,6 +4,7 @@ import fsm_statemanager as fsm
 import pandas as pd
 import numpy as np
 import time
+import pickle
 
 
 def dialog_system():
@@ -17,7 +18,7 @@ def dialog_system():
     }
 
     # data imports
-    dialog_training_df, dialog_testing_df = text_classification.import_data(data_dir="Data/dialog_acts.dat", drop_duplicates=True)
+    dialog_training_df, dialog_testing_df = text_classification.import_data(data_dir="Data/dialog_acts.dat")
     restaurants_database = pd.read_csv("Data/restaurant_info.csv")
 
     # add additional properties to restaurants_db
@@ -35,10 +36,10 @@ def dialog_system():
     if configuration_dict['use_rulebaseline']:
         classifier = classifiers.RuleBaselineClassifier()
     else:
-        classifier = classifiers.FeedForwardNeuralNetworkClassifier()
-        print('Training classifier...')
-        # this classifier is already deduplicated since the duplications have been removed when the data was retrieved
-        classifier.train(x_train=dialog_training_df["utterance_content"], y_train=dialog_training_df["dialog_act"])
+        # Load the pickled object from the file
+        print('Loading classifier')
+        with open('FeedForwardsNeuralNetwork-deDuplicated.pkl', 'rb') as file:
+            classifier = pickle.load(file)
         print('Classifier is ready.')
 
     # initialize dialog agent

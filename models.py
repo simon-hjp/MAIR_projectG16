@@ -8,6 +8,7 @@ from tensorflow import keras
 from keras import layers
 from keras.utils import to_categorical
 import matplotlib.pyplot as plt
+import pickle
 
 # our code
 import classifiers as cl
@@ -149,6 +150,14 @@ def create_models(data_dir):
     ffnn_classifier_dd = cl.FeedForwardNeuralNetworkClassifier(name="Feed-Forward Neural Network without duplicates")
     ffnn_classifier_dd.train(df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"])
     tc.evaluate_model(ffnn_classifier_dd, df_test_deduplicated)
+
+    should_pickle = False
+    # Pickle the object and save it to a file
+    if should_pickle:
+        file_path = 'FeedForwardsNeuralNetwork-deDuplicated.pkl'
+        with open(file_path, 'wb') as file:
+            pickle.dump(ffnn_classifier_dd, file)
+
 
     # add all models to a dictionary and return it
     models_dict = {
