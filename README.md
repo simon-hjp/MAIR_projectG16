@@ -27,6 +27,9 @@ We'll implement and empirically evaluate a machine learning classifier for natur
 - **Dialog System Application**: 
 Using the dialog model and classifiers, we'll develop a text-based dialog system application. Users will interact with our system to receive restaurant recommendations.
 
+The Diagram of the dialog system application.
+![Diagram](diagram.png)
+
 **Part 2**:
 Has not started yet.
 
