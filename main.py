@@ -43,12 +43,15 @@ def dialog_system():
         print('Classifier is ready.')
 
     # initialize dialog agent
-    manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, configuration=configuration_dict, classifier=classifier, startstate=1)
+    manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, configuration=configuration_dict,
+                                     classifier=classifier, startstate=1)
     # print welcome message
     if manager._configuration['informal_switch']:
-        print('Hi there, welcome to this automated restaurant recommendation system! Let me know what you\'re looking for, and I will search some restaurants for you.')
+        print(
+            'Hi there, welcome to this automated restaurant recommendation system! Let me know what you\'re looking for, and I will search some restaurants for you.')
     else:
-        print('Good day human! Welcome to this automated restaurant recommendation system. Please state what kind of restaurant you are looking for.')
+        print(
+            'Good day human! Welcome to this automated restaurant recommendation system. Please state what kind of restaurant you are looking for.')
     while not manager._terminated:
         if manager._configuration['display_state_number']:
             print(manager._state)
