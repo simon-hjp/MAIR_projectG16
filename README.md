@@ -27,7 +27,7 @@ We'll implement and empirically evaluate a machine learning classifier for natur
 - **Dialog System Application**: 
 Using the dialog model and classifiers, we'll develop a text-based dialog system application. Users will interact with our system to receive restaurant recommendations.
 
-The Diagram of the dialog system application.
+The conversation flow of the dialog system application, where the rectangles represent system utterances and circles represent 	user responses. The rhombus shape represents an internal logic handler of inputs ( if-else functionality).
 ![Diagram](diagram.png)
 
 **Part 2**:
