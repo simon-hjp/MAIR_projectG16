@@ -12,7 +12,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 
 # our code
-import models
+from src import models
 
 # global label encoder and vectorizer
 label_encoder = LabelEncoder()

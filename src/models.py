@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 import pickle
 
 # our code
-import classifiers as cl
-import text_classification as tc
+from src import classifiers as cl
+from src import text_classification as tc
 
 
 class FeedForwardNeuralNetwork:
@@ -82,7 +82,7 @@ class FeedForwardNeuralNetwork:
         sentences = self.reshape_x(sentences)
         # retrieve the model estimate
         prediction = self.model(sentences)
-        prediction = prediction.numpy()
+        prediction = np.array(prediction) # was: prediction.numpy()
         # select the most likely answer
         prediction = np.argmax(prediction, axis=1)
         return prediction

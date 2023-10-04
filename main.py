@@ -1,11 +1,11 @@
-import text_classification
-import classifiers
-import fsm_statemanager as fsm
 import pandas as pd
 import numpy as np
 import time
 import pickle
 
+from src import text_classification
+from src import classifiers
+from src import fsm_statemanager as fsm
 
 def dialog_system():
     # Dictionary containing the configuration values

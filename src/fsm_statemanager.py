@@ -1,9 +1,9 @@
-import classifiers
-import utterance_extraction_recommendation as uer
-import levenshtein_spellchecking as ls
 import pandas as pd
 import time
 
+from src import classifiers
+from src import utterance_extraction_recommendation as uer
+from src import levenshtein_spellchecking as ls
 
 class FiniteStateMachine:
     def __init__(
