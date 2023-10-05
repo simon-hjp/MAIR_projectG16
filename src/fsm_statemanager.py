@@ -694,17 +694,21 @@ class FiniteStateMachine:
                         self._probable_restaurant,
                         self._possible_recommendations,
                     ) = uer.pop_recommendation(self._possible_recommendations)
+
+                    #Fetching the reasoning behind the additional requirement
+                    rec_rests, preference_reason = self.preference_reasoning(self._possible_recommendations, self._preferred_preference)
+
                     if self._configuration["informal_switch"]:
                         self.add_speech(
                             f"Ok great, I have found a restaurant that matches your requirements! "
                             f"It is the '{self._probable_restaurant}' restaurant. "
-                            f"Would you like more information?"
+                            f"{preference_reason} Would you like more information?"
                         )
                     else:
                         self.add_speech(
                             f"I have found a restaurant that matches your exact requirements human! "
                             f"It is the '{self._probable_restaurant}' restaurant. "
-                            f"Would you like additional information?"
+                            f"{preference_reason} Would you like additional information?"
                         )
                     self.set_state(10)
                     return
