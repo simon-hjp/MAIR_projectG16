@@ -14,6 +14,11 @@ class FiniteStateMachine:
         startstate: int = 0,
         endstate: int = 18,
     ):
+        """Initialises a Finite State Machine Dialogue Manager. Requires a dataframe containing data on
+        restaurants, the configuration of the system as a whole, a classifier which predicts dialogue acts
+        from given user utterances (the RuleBaselineClassifier is used by default). The startstate
+        may also be modified (although heavily discouraged) and the endstate may also be modified
+        (discouraged)."""
         self._state = startstate
         self._start = startstate
         self._end = endstate
@@ -49,12 +54,16 @@ class FiniteStateMachine:
         self._additional_requirements = []
 
     def logic(self, inp: str):
-        # One small problem with the current structure; currently the hello state system utterance will always be skipped, not sure if that's intentional.
+        """Handles the logic loop of the finite state machine dialogue manager; user utterances are fed through the FSM network in
+        combination with the current state and the classifier, and the system utterance is given back to the current process"""
         self.input_handler(inp)
         return self.output_handler()
 
     def input_handler(self, inp: str):
-        """Manually defined function for handling logic with string inputs"""
+        """Manually defined function for handling logic with string inputs which represent user utterances.
+        This function has been manually coded to reflect the FSM diagram, and user utterances are classified
+        for dialog acts, where the system output depends on the dialog act and the information present in
+        the user utterance."""
         # inp = inp.lower()
         if self.get_state() == 1:  # Hello
             dialog_act = self.classifier_handler(inp)
@@ -855,26 +864,37 @@ class FiniteStateMachine:
             self._terminated = True
 
     def classifier_handler(self, inp: str):
+        """Feeds user inputs through the dialog act classifier model."""
         return self._classifier.predict_act(inp)
 
     def add_speech(self, string: str):
+        """Handles string inputs. Uses given configuration to determine
+        whether output should be in caps or not, and formats it to use multiple
+        lines of input."""
         if self._configuration["output_all_caps"]:
             string = string.upper()
         self._storedstring += string + "\n"
 
     def output_handler(self):
+        """Returns the stored string (added through self.add_speech()) while
+        emptying the stored string afterwards."""
         tmp = self._storedstring
         self._storedstring = ""
         return tmp
 
     def get_state(self):
+        """Returns the current state the FSM is currently evaluating."""
         return self._state
 
     def set_state(self, state: int):
+        """Sets a new state for the FSM to evaluate. Also flags that the
+        FSM has reached the terminal state if this is the case."""
         self._state = state
         if self._state == self._end:
             self._terminated = True
 
     def reset(self):
+        """Resets the FSM, restoring the state to the start state
+        and clearing only the terminated flag."""
         self._state = self._start
         self._terminated = False
