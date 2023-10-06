@@ -66,11 +66,17 @@ def dialog_system(config: dict):
                                      classifier=classifier, startstate=1)
     # print welcome message
     if manager._configuration['informal']:
-        print(
-            'Hi there, welcome to this automated restaurant recommendation system! Let me know what you\'re looking for, and I will search some restaurants for you.')
+        greetstring = 'Hi there, welcome to this automated restaurant recommendation system! Let me know what you\'re looking for, and I will search some restaurants for you.'
+        if manager._configuration['capitals']:
+            print(greetstring.upper())
+        else:
+            print(greetstring)
     else:
-        print(
-            'Good day human! Welcome to this automated restaurant recommendation system. Please state what kind of restaurant you are looking for.')
+        greetstring = 'Good day human! Welcome to this automated restaurant recommendation system. Please state what kind of restaurant you are looking for.'
+        if manager._configuration['capitals']:
+            print(greetstring.upper())
+        else:
+            print(greetstring)
     while not manager._terminated:
         if manager._configuration['display_state_number']:
             print(manager._state)
