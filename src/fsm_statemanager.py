@@ -5,6 +5,8 @@ from src import classifiers
 from src import utterance_extraction_recommendation as uer
 from src import levenshtein_spellchecking as ls
 
+levenshtein_distance = 3
+
 class FiniteStateMachine:
     def __init__(
         self,
@@ -98,13 +100,13 @@ class FiniteStateMachine:
                         )
                     self.set_state(2)
                     return
-                if uid["food"] != "" and uid["food"] != ls.spellcheck(uid["food"], "food"):
+                if uid["food"] != "" and uid["food"] != ls.spellcheck(uid["food"], "food", levenshtein_distance):
                     # Food likely misspelled
                     self.add_speech(
                         "I could not find anything related to {}, are you perhaps interested in "
-                        "{}?".format(uid["food"], ls.spellcheck(uid["food"], "food"))
+                        "{}?".format(uid["food"], ls.spellcheck(uid["food"], "food", levenshtein_distance))
                     )
-                    self._probable_food = ls.spellcheck(uid["food"], "food")
+                    self._probable_food = ls.spellcheck(uid["food"], "food", levenshtein_distance)
                     self.set_state(3)
                     return
                 else:
@@ -127,13 +129,13 @@ class FiniteStateMachine:
                     self.set_state(4)
                     return
                 if uid["area"] != "" and uid["area"] != ls.spellcheck(
-                    uid["area"], "area", 3
+                    uid["area"], "area", levenshtein_distance
                 ):  # Area likely misspelled
                     self.add_speech(
                         "I could not find anything related to {}, are you perhaps interested in "
-                        "{}?".format(uid["area"], ls.spellcheck(uid["area"], "area", 3))
+                        "{}?".format(uid["area"], ls.spellcheck(uid["area"], "area", levenshtein_distance))
                     )
-                    self._probable_area = ls.spellcheck(uid["area"], "area", 3)
+                    self._probable_area = ls.spellcheck(uid["area"], "area", levenshtein_distance)
                     self.set_state(5)
                     return
                 else:
@@ -162,17 +164,17 @@ class FiniteStateMachine:
 
                 if uid["pricerange"] != "" and uid[
                     "pricerange"
-                ] != ls.spellcheck(uid["pricerange"], "pricerange", 3):
+                ] != ls.spellcheck(uid["pricerange"], "pricerange", levenshtein_distance):
                     # Price range likely misspelled
                     self.add_speech(
                         "I could not find any price range to {}, are you perhaps interested in a {} "
                         "price range?".format(
                             uid["pricerange"],
-                            ls.spellcheck(uid["pricerange"], "pricerange", 3),
+                            ls.spellcheck(uid["pricerange"], "pricerange", levenshtein_distance),
                         )
                     )
                     self._probable_pricerange = ls.spellcheck(
-                        uid["pricerange"], "pricerange", 3
+                        uid["pricerange"], "pricerange", levenshtein_distance
                     )
                     self.set_state(7)
                     return
@@ -235,18 +237,18 @@ class FiniteStateMachine:
                         )
                     self.set_state(4)
                     return
-                elif uid["food"] != ls.spellcheck(uid["food"], "food", 3):
+                elif uid["food"] != ls.spellcheck(uid["food"], "food", levenshtein_distance):
                     self.add_speech(
                         "I could not find any food related to {}, are you perhaps interested in {} "
                         "cuisine?".format(
-                            uid["food"], ls.spellcheck(uid["food"], "food", 3)
+                            uid["food"], ls.spellcheck(uid["food"], "food", levenshtein_distance)
                         )
                     )
-                    self._probable_food = ls.spellcheck(uid["food"], "food", 3)
+                    self._probable_food = ls.spellcheck(uid["food"], "food", levenshtein_distance)
                     self.set_state(3)
                     return
                 elif uid["food"] != "" and uid["food"] == ls.spellcheck(
-                    uid["food"], "food", 3
+                    uid["food"], "food", levenshtein_distance
                 ):
                     self._preferred_food = uid["food"]
                     self.add_speech(
@@ -364,16 +366,16 @@ class FiniteStateMachine:
                         )
                     self.set_state(6)
                     return
-                elif uid["area"] != ls.spellcheck(uid["area"], "area", 3):
+                elif uid["area"] != ls.spellcheck(uid["area"], "area", levenshtein_distance):
                     self.add_speech(
                         "I could not find any area related to {}, are you perhaps interested in the {} "
-                        "area?".format(uid["area"], ls.spellcheck(uid["area"], "area", 3))
+                        "area?".format(uid["area"], ls.spellcheck(uid["area"], "area", levenshtein_distance))
                     )
-                    self._probable_area = ls.spellcheck(uid["area"], "area", 3)
+                    self._probable_area = ls.spellcheck(uid["area"], "area", levenshtein_distance)
                     self.set_state(5)
                     return
                 elif uid["area"] != "" and uid["area"] == ls.spellcheck(
-                    uid["area"], "area", 3
+                    uid["area"], "area", levenshtein_distance
                 ):
                     self._preferred_area = uid["area"]
                     self.add_speech(
@@ -485,17 +487,17 @@ class FiniteStateMachine:
                     self.set_state(8)
                     return
                 elif uid["pricerange"] != ls.spellcheck(
-                    uid["pricerange"], "pricerange", 3
+                    uid["pricerange"], "pricerange", levenshtein_distance
                 ):
                     self.add_speech(
-                        f"I could not find any {uid['pricerange']} price range, are you perhaps interested in a {ls.spellcheck(uid['pricerange'], 'pricerange', 3)} "
+                        f"I could not find any {uid['pricerange']} price range, are you perhaps interested in a {ls.spellcheck(uid['pricerange'], 'pricerange', levenshtein_distance)} "
                         "restaurant?"
                     )
                     self.set_state(7)
                     return
                 elif uid["pricerange"] != "" and uid[
                     "pricerange"
-                ] == ls.spellcheck(uid["pricerange"], "pricerange", 3):
+                ] == ls.spellcheck(uid["pricerange"], "pricerange", levenshtein_distance):
                     self._preferred_pricerange = uid["pricerange"]
                     self.add_speech(
                         f"I understood that you are interested in a {self._preferred_pricerange} restaurant. Do you have any "
@@ -604,7 +606,7 @@ class FiniteStateMachine:
                     self.set_state(8)
                     return
                 elif uid["preference"] != ls.spellcheck(
-                    uid["preference"], "preference", 3
+                    uid["preference"], "preference", levenshtein_distance
                 ):
                     self.add_speech(
                         f"I could not find any suitable restaurant for the additional requirement '{uid['preference']}'. "
@@ -614,7 +616,7 @@ class FiniteStateMachine:
                     return
                 elif uid["preference"] != "" and uid[
                     "preference"
-                ] == ls.spellcheck(uid["preference"], "preference", 3):
+                ] == ls.spellcheck(uid["preference"], "preference", levenshtein_distance):
                     self._additional_requirements = uid["preference"]
                     self.add_speech(
                         f"I understood that you have an additional requirement for '{self._additional_requirements}'. "
