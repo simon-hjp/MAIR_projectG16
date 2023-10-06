@@ -41,6 +41,7 @@ def spellcheck(word: str, keyword: str, threshold: int=3):
     return closest_word
 
 def test_spellchecking():
+    """Spell check a word provided by user."""
     # Input word to be corrected
     input_word = input("Enter a word: ").lower()
 

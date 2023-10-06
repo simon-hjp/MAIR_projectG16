@@ -86,7 +86,6 @@ def dialog_system(config: dict):
             time.sleep(manager._configuration['delay'])
         print(out)
 
-
 if __name__ == "__main__":
     configuration = ask_user_configurations()
     print(configuration)
