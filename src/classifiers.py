@@ -59,6 +59,7 @@ class RuleBaselineClassifier:
 
     def predict_act(self, utterance) -> str:
         """Predict the dialog act of utterances using a set of rules."""
+        utterance = utterance.lower()
         if self.utterance_contains_word(utterance,
                                         ["food", "restaurant", "town", "east", "west", "south", "north", "part"]):
             return "inform"
