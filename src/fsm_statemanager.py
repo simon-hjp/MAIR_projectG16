@@ -488,7 +488,7 @@ class FiniteStateMachine:
                     uid["pricerange"], "pricerange", 3
                 ):
                     self.add_speech(
-                        f"I could not find any {uid['pricerange']} price range, are you perhaps interested in a {ls.spellcheck(uid['pricerange'], "pricerange", 3)} "
+                        f"I could not find any {uid['pricerange']} price range, are you perhaps interested in a {ls.spellcheck(uid['pricerange'], 'pricerange', 3)} "
                         "restaurant?"
                     )
                     self.set_state(7)
@@ -696,7 +696,7 @@ class FiniteStateMachine:
                     ) = uer.pop_recommendation(self._possible_recommendations)
 
                     #Fetching the reasoning behind the additional requirement
-                    rec_rests, preference_reason = self.preference_reasoning(self._possible_recommendations, self._preferred_preference)
+                    rec_rests, preference_reason = uer.preference_reasoning(self._possible_recommendations, self._preferred_preference) # type: ignore
 
                     if self._configuration["informal_switch"]:
                         self.add_speech(
