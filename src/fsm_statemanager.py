@@ -98,13 +98,13 @@ class FiniteStateMachine:
                         )
                     self.set_state(2)
                     return
-                if uid["food"] != "" and uid["food"] != ls.spellcheck(uid["food"], "food", 3):
+                if uid["food"] != "" and uid["food"] != ls.spellcheck(uid["food"], "food"):
                     # Food likely misspelled
                     self.add_speech(
                         "I could not find anything related to {}, are you perhaps interested in "
-                        "{}?".format(uid["food"], ls.spellcheck(uid["food"], "food", 3))
+                        "{}?".format(uid["food"], ls.spellcheck(uid["food"], "food"))
                     )
-                    self._probable_food = ls.spellcheck(uid["food"], "food", 3)
+                    self._probable_food = ls.spellcheck(uid["food"], "food")
                     self.set_state(3)
                     return
                 else:
@@ -235,18 +235,18 @@ class FiniteStateMachine:
                         )
                     self.set_state(4)
                     return
-                elif uid["food"] != ls.food_spellcheck(uid["food"], 3):
+                elif uid["food"] != ls.spellcheck(uid["food"], "food", 3):
                     self.add_speech(
                         "I could not find any food related to {}, are you perhaps interested in {} "
                         "cuisine?".format(
-                            uid["food"], ls.food_spellcheck(uid["food"], 3)
+                            uid["food"], ls.spellcheck(uid["food"], "food", 3)
                         )
                     )
-                    self._probable_food = ls.food_spellcheck(uid["food"], 3)
+                    self._probable_food = ls.spellcheck(uid["food"], "food", 3)
                     self.set_state(3)
                     return
-                elif uid["food"] != "" and uid["food"] == ls.food_spellcheck(
-                    uid["food"], 3
+                elif uid["food"] != "" and uid["food"] == ls.spellcheck(
+                    uid["food"], "food", 3
                 ):
                     self._preferred_food = uid["food"]
                     self.add_speech(
@@ -364,16 +364,16 @@ class FiniteStateMachine:
                         )
                     self.set_state(6)
                     return
-                elif uid["area"] != ls.area_spellcheck(uid["area"], 3):
+                elif uid["area"] != ls.spellcheck(uid["area"], "area", 3):
                     self.add_speech(
                         "I could not find any area related to {}, are you perhaps interested in the {} "
-                        "area?".format(uid["area"], ls.area_spellcheck(uid["area"], 3))
+                        "area?".format(uid["area"], ls.spellcheck(uid["area"], "area", 3))
                     )
-                    self._probable_area = ls.area_spellcheck(uid["area"], 3)
+                    self._probable_area = ls.spellcheck(uid["area"], "area", 3)
                     self.set_state(5)
                     return
-                elif uid["area"] != "" and uid["area"] == ls.area_spellcheck(
-                    uid["area"], 3
+                elif uid["area"] != "" and uid["area"] == ls.spellcheck(
+                    uid["area"], "area", 3
                 ):
                     self._preferred_area = uid["area"]
                     self.add_speech(
@@ -484,18 +484,18 @@ class FiniteStateMachine:
                         )
                     self.set_state(8)
                     return
-                elif uid["pricerange"] != ls.pricerange_spellcheck(
-                    uid["pricerange"], 3
+                elif uid["pricerange"] != ls.spellcheck(
+                    uid["pricerange"], "pricerange", 3
                 ):
                     self.add_speech(
-                        f"I could not find any {uid['pricerange']} price range, are you perhaps interested in a {ls.food_spellcheck(uid['pricerange'], 3)} "
+                        f"I could not find any {uid['pricerange']} price range, are you perhaps interested in a {ls.spellcheck(uid['pricerange'], "pricerange", 3)} "
                         "restaurant?"
                     )
                     self.set_state(7)
                     return
                 elif uid["pricerange"] != "" and uid[
                     "pricerange"
-                ] == ls.pricerange_spellcheck(uid["pricerange"], 3):
+                ] == ls.spellcheck(uid["pricerange"], "pricerange", 3):
                     self._preferred_pricerange = uid["pricerange"]
                     self.add_speech(
                         f"I understood that you are interested in a {self._preferred_pricerange} restaurant. Do you have any "
@@ -603,8 +603,8 @@ class FiniteStateMachine:
                         )
                     self.set_state(8)
                     return
-                elif uid["preference"] != ls.preference_spellcheck(
-                    uid["preference"], 3
+                elif uid["preference"] != ls.spellcheck(
+                    uid["preference"], "preference", 3
                 ):
                     self.add_speech(
                         f"I could not find any suitable restaurant for the additional requirement '{uid['preference']}'. "
@@ -614,7 +614,7 @@ class FiniteStateMachine:
                     return
                 elif uid["preference"] != "" and uid[
                     "preference"
-                ] == ls.preference_spellcheck(uid["preference"], 3):
+                ] == ls.spellcheck(uid["preference"], "preference", 3):
                     self._additional_requirements = uid["preference"]
                     self.add_speech(
                         f"I understood that you have an additional requirement for '{self._additional_requirements}'. "
