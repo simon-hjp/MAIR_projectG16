@@ -66,5 +66,6 @@ def test_spellchecking():
     else:
         print("No suggestion found for area.")
 
-# test_spellchecking()
+if __name__ == "__main__":
+    test_spellchecking()
 

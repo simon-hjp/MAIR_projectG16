@@ -77,7 +77,7 @@ def dialog_system(config: dict):
         inp = input('>>>')
         out = manager.logic(inp)
         if manager._configuration['delay'] > 0:
-            time.sleep(manager._configuration['add_output_delay'])
+            time.sleep(manager._configuration['delay'])
         print(out)
 
 
