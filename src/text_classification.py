@@ -12,7 +12,6 @@ from sklearn.metrics import classification_report
 from src import models
 from src import classifiers as cl
 
-
 ###
 # Data importing and initial preprocessing
 ###
@@ -98,7 +97,7 @@ def command_line_testing(models_dict: dict):
             continue
 
 
-def run(data_dir="Data\\dialog_acts.dat"):
+def run(data_dir="Data/dialog_acts.dat"):
     """Train models and report their performance, then initiate the command line testing."""
 
     trained_models = models.create_models(data_dir=data_dir)
@@ -106,4 +105,4 @@ def run(data_dir="Data\\dialog_acts.dat"):
 
 
 if __name__ == "__main__":
-    run(data_dir="dialog_acts.dat")
+    run(data_dir="Data/dialog_acts.dat")

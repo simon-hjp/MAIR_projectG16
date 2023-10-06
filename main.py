@@ -7,15 +7,34 @@ from src import text_classification
 from src import classifiers
 from src import fsm_statemanager as fsm
 
-def dialog_system():
-    # Dictionary containing the configuration values
-    configuration_dict = {
-        'use_rulebaseline': True,
-        'output_all_caps': False,
-        'add_output_delay': 0,
-        'informal_switch': True,
-        'display_state_number': False  # only used for testing, not experimenting.
-    }
+def ask_user_configurations():
+    """Ask the user for their preferences regarding configurability of the dialog system. The preferences are saved in a dictionary which is returned after the function."""
+    configurations = {}
+
+    rulebaseline_preference = ['rulebaseline', 'Would you like to use the rule-based baseline model instead of the machine learning model? y/n\n', None]
+    caps_preference = ['capitals', 'Would you like the system to reply in capital letters at all times? y/n\n', None]
+    informal_preference = ['informal', 'Would you like the dialog system to reply with informal language instead of formal language? y/n\n', None]
+    delay_preference = ['delay', 'Would you like the system to set a delay before it returns system utterances? Provide the number of seconds between 1 and 10, or "0" if you do not want any delay.\n', None]
+    
+    print('Please indicate how you would like the dialog system to be configured. There will be five questions in total.')
+    for preference in [rulebaseline_preference, caps_preference, informal_preference]:
+        while preference[2] not in ["y", "n"]:
+            preference[2] = input(preference[1]).lower()
+        if preference[2] == 'y':
+            configurations[preference[0]] = True
+        else:
+            configurations[preference[0]] = False
+
+    delays = ["0", "1", "2", "3", "4", "5", "6,", "7", "8", "9", "10"]
+    while delay_preference[2] not in delays:
+        delay_preference[2] = input(delay_preference[1])
+    configurations[delay_preference[0]] = int(delay_preference[2])
+    return configurations
+
+def dialog_system(config: dict):
+    """Initialize the dialog system."""
+    # configuration values only used for testing, not experimenting.
+    config['display_state_number'] = False
 
     # data imports
     dialog_training_df, dialog_testing_df = text_classification.import_data(data_dir="Data/dialog_acts.dat")
@@ -33,7 +52,7 @@ def dialog_system():
     classifiers.label_encoder.fit(dialog_training_df["dialog_act"])
     classifiers.vectorizer.fit(dialog_training_df["utterance_content"])
 
-    if configuration_dict['use_rulebaseline']:
+    if config['rulebaseline']:
         classifier = classifiers.RuleBaselineClassifier()
     else:
         # Load the pickled object from the file
@@ -43,10 +62,10 @@ def dialog_system():
         print('Classifier is ready.')
 
     # initialize dialog agent
-    manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, configuration=configuration_dict,
+    manager = fsm.FiniteStateMachine(restaurant_data=restaurants_database, configuration=config,
                                      classifier=classifier, startstate=1)
     # print welcome message
-    if manager._configuration['informal_switch']:
+    if manager._configuration['informal']:
         print(
             'Hi there, welcome to this automated restaurant recommendation system! Let me know what you\'re looking for, and I will search some restaurants for you.')
     else:
@@ -57,10 +76,12 @@ def dialog_system():
             print(manager._state)
         inp = input('>>>')
         out = manager.logic(inp)
-        if manager._configuration['add_output_delay']:
+        if manager._configuration['delay'] > 0:
             time.sleep(manager._configuration['add_output_delay'])
         print(out)
 
 
 if __name__ == "__main__":
-    dialog_system()
+    configuration = ask_user_configurations()
+    print(configuration)
+    dialog_system(config=configuration)
