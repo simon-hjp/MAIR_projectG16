@@ -493,6 +493,8 @@ class FiniteStateMachine:
                         f"I could not find any {uid['pricerange']} price range, are you perhaps interested in a {ls.spellcheck(uid['pricerange'], 'pricerange', levenshtein_distance)} "
                         "restaurant?"
                     )
+                    self._probable_pricerange = ls.spellcheck(
+uid["pricerange"], "pricerange", levenshtein_distance)
                     self.set_state(7)
                     return
                 elif uid["pricerange"] != "" and uid[
@@ -542,7 +544,7 @@ class FiniteStateMachine:
                 self._preferred_pricerange = self._probable_pricerange
                 self._probable_pricerange = ""
                 self.add_speech(
-                    f"Allright, I understood that you are interested in a {self._preferred_pricerange} restaurant. "
+                    f"Alright, I understood that you are interested in a {self._preferred_pricerange} restaurant. "
                     "Do you have any further requirements?"
                 )
                 self.set_state(8)
@@ -698,9 +700,9 @@ class FiniteStateMachine:
                     ) = uer.pop_recommendation(self._possible_recommendations)
 
                     #Fetching the reasoning behind the additional requirement
-                    rec_rests, preference_reason = uer.preference_reasoning(self._possible_recommendations, self._preferred_preference) # type: ignore
+                    rec_rests, preference_reason = uer.preference_reasoning(self._possible_recommendations, self._additional_requirements) # type: ignore
 
-                    if self._configuration["informal_switch"]:
+                    if self._configuration["informal"]:
                         self.add_speech(
                             f"Ok great, I have found a restaurant that matches your requirements! "
                             f"It is the '{self._probable_restaurant}' restaurant. "
