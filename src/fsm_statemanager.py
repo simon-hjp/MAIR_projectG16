@@ -820,7 +820,13 @@ uid["pricerange"], "pricerange", levenshtein_distance)
                     )
                 self.set_state(10)
                 return
-
+            elif dialog_act == "deny" or dialog_act == "bye":
+                if self._configuration["informal"]:
+                    self.add_speech("Very well, would you like to start over or is my function fullfilled?")
+                else:
+                    self.add_speech("Alright, human. Would you like to start over or is my function fullfilled?")
+                self.set_state(11)
+                return
             else:
                 if self._configuration["informal"]:
                     self.add_speech(
@@ -834,7 +840,7 @@ uid["pricerange"], "pricerange", levenshtein_distance)
                     )
                 return
 
-        elif( self.get_state() == 11):
+        elif self.get_state() == 11:
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "bye" or dialog_act == "thankyou":
                 if self._configuration["informal"]:
