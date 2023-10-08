@@ -119,8 +119,8 @@ class DialogActsClassifier:
         vectorizer.fit(x_train)
         x_train_bow = vectorizer.transform(x_train)
 
-        # if a hyperparameter grid is specified, perform a grid search
-        if fit_hyperparams:
+        # if a hyperparameter grid is specified for decision tree models, perform a grid search
+        if 'decision tree' in self.name.lower() and fit_hyperparams:
 
             dt_params = {
                 "criterion": ["gini", "entropy"],
