@@ -2,19 +2,30 @@ import pandas as pd
 from Levenshtein import distance
 
 # Read the csv
-csv_file = 'Data/restaurant_info.csv'
-df = pd.read_csv(csv_file, sep=',')
+try:
+    csv_file = '../Data/restaurant_info.csv'
+    df = pd.read_csv(csv_file, sep=',')
+except:
+    csv_file = 'Data/restaurant_info.csv'
+    df = pd.read_csv(csv_file, sep=',')
 
 # create word lists
 foods_list = df['food'].unique().tolist()
+
 areas_list = ["north", "west", "east", "south", "centre"]
+
 priceranges_list = ["budget-friendly", "cheap", "affordable", "economical", "low-cost", "thrifty",
                     "wallet-friendly", "average", "moderate", "mid-range", "reasonable", "fair",
                     "standard", "middle-of-the-road", "not too pricey", "decently priced", "luxury", "high-end",
                     "expensive", "upscale", "premium", "lavish", "top-tier", "pricey", "exclusive"]
+
 preferences_list = ['touristic', 'not touristic', 'romantic', 'not romantic',
                     'children', 'no children', 'not children', 'assigned seats',
                     'no assigned seats', 'not assigned seats']
+
+dontcare_list = ["I don't care","dontcare","dont care","Don't care","any will do","any","whatever","whatever works",
+                 "any works","idunno","no preference","I have no preference","up for anything","i dont know",
+                 "don't know","i don't know","what ever","any","I do not care","care"]
 
 def spellcheck(word: str, keyword: str, threshold: int=3):
     """Perform spellchecking of important words in the user utterance with Levenshtein edit distance."""
@@ -26,8 +37,12 @@ def spellcheck(word: str, keyword: str, threshold: int=3):
         word_list = priceranges_list
     elif keyword == "preference":
         word_list = preferences_list
+    elif keyword == "dontcare":
+        word_list = dontcare_list
     else:
         raise ValueError(f'Invalid keyword for spellchecking : {keyword}.')
+
+
     closest_word = None # No suggestion yet
     min_distance = threshold # How many steps to edit to the correct word (delete, change, add letters etc.)
 

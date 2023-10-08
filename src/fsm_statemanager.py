@@ -1,9 +1,13 @@
 import pandas as pd
-import time
 
-from src import classifiers
-from src import utterance_extraction_recommendation as uer
-from src import levenshtein_spellchecking as ls
+try:
+    from src import classifiers
+    from src import utterance_extraction_recommendation as uer
+    from src import levenshtein_spellchecking as ls
+except:
+    import classifiers
+    import utterance_extraction_recommendation as uer
+    import levenshtein_spellchecking as ls
 
 levenshtein_distance = 3
 
@@ -83,9 +87,23 @@ class FiniteStateMachine:
                 self.set_state(2)
                 return
             if dialog_act == "inform":
-                uid = uer.info_in_utterance(
-                    utterance=inp, restaurant_df=self._restaurant_db
-                )  # Utterance Information Dictionary
+
+                uid = uer.info_in_utterance( utterance=inp, restaurant_df=self._restaurant_db)
+                # Utterance Information Dictionary
+
+                if ls.spellcheck(inp,"dontcare"):
+                    uid = uer.info_in_utterance(utterance="random", restaurant_df=self._restaurant_db)
+                    self.add_speech(
+                        "I interpreted that you don't care at all what kind of restaurant you'd like to visit, therefore"
+                        " \neverything goes and a restaurant will be chosen at random.")
+                    self._preferred_food = uid["food"]
+                    self._preferred_area = uid["area"]
+                    self._preferred_pricerange = uid["pricerange"]
+                    self.add_speech("Do you have any further requirements?")
+                    self.set_state(8)
+                    return
+
+
                 if uid["food"] == "":  # No valid food detected.
                     self._preferred_food = uid["food"]
                     if self._configuration["informal"]:
@@ -211,6 +229,18 @@ class FiniteStateMachine:
                 uid = uer.info_in_utterance(
                     utterance=inp, restaurant_df=self._restaurant_db
                 )  # Utterance Information Dictionary
+
+                if ls.spellcheck(inp,"dontcare"):
+                    uid = uer.info_in_utterance(utterance="random", restaurant_df=self._restaurant_db)
+                    self.add_speech("I interpreted that you don't care at all what kind of food you'd like, a cuisine will be chosen at random.")
+                    self._preferred_food = uid["food"]
+                    self.add_speech(
+                        "The {} cuisine was chosen, what area are you "
+                        "looking for?".format(self._preferred_food)
+                    )
+                    self.set_state(4)
+                    return
+
                 if uid["food"] == "":  # No valid food detected.
                     if self._configuration["informal"]:
                         self.add_speech(
@@ -224,7 +254,7 @@ class FiniteStateMachine:
                         )
                     self.set_state(2)
                     return
-                elif uid["food"] == "dontcare":
+                elif ls.spellcheck(inp,"dontcare"):
                     self._preferred_food = uid["food"]
                     if self._configuration["informal"]:
                         self.add_speech(
@@ -333,12 +363,24 @@ class FiniteStateMachine:
                         "Is my recommendation correct human? Or would you perhaps like to start over?"
                     )
                 return
+
         elif self.get_state() == 4:  # Ask for area preference
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "inform":
                 uid = uer.info_in_utterance(
                     utterance=inp, restaurant_df=self._restaurant_db
                 )  # Utterance Information Dictionary
+
+                if ls.spellcheck(inp,"dontcare"):
+                    uid = uer.info_in_utterance(utterance="random", restaurant_df=self._restaurant_db)
+                    self.add_speech("I interpreted that you don't care at all what area to go, an area will be chosen at random.")
+                    self._preferred_area = uid["area"]
+                    self.add_speech(
+                        "The {} area was chosen, What price range are you interested in?".format(self._preferred_area)
+                        )
+                    self.set_state(6)
+                    return
+
                 if uid["area"] == "":  # No valid area detected.
                     if self._configuration["informal"]:
                         self.add_speech(
@@ -352,7 +394,7 @@ class FiniteStateMachine:
                         )
                     self.set_state(4)
                     return
-                if uid["area"] == "dontcare":  # No valid area detected.
+                if ls.spellcheck(inp,"dontcare"):  # No valid area detected.
                     self._preferred_area = uid["area"]
                     if self._configuration["informal"]:
                         self.add_speech(
@@ -459,6 +501,17 @@ class FiniteStateMachine:
                 uid = uer.info_in_utterance(
                     utterance=inp, restaurant_df=self._restaurant_db
                 )  # Utterance Information Dictionary
+
+                if ls.spellcheck(inp,"dontcare"):
+                    uid = uer.info_in_utterance(utterance="random", restaurant_df=self._restaurant_db)
+                    self.add_speech("I interpreted that you don't care at all about a price range, it will be chosen at random.")
+                    self._preferred_pricerange = uid["price_range"]
+                    self.add_speech(
+                        "The {} price range was chosen, do you have any further requirements?".format(self._preferred_pricerange)
+                        )
+                    self.set_state(8)
+                    return
+
                 if uid["pricerange"] == "":  # No valid area detected.
                     if self._configuration["informal"]:
                         self.add_speech(
@@ -472,7 +525,7 @@ class FiniteStateMachine:
                         )
                     self.set_state(6)
                     return
-                if uid["pricerange"] == "dontcare":
+                if ls.spellcheck(inp,"dontcare"):
                     self._preferred_pricerange = uid["pricerange"]
                     if self._configuration["informal"]:
                         self.add_speech(
@@ -573,6 +626,7 @@ uid["pricerange"], "pricerange", levenshtein_distance)
                         "Are my recommendation correct human? Or would you perhaps like to start over?"
                     )
                 return
+
         elif self.get_state() == 8:  # Additional requests
             dialog_act = self.classifier_handler(inp)
             if dialog_act == "inform":
@@ -593,7 +647,7 @@ uid["pricerange"], "pricerange", levenshtein_distance)
                         )
                     self.set_state(8)
                     return
-                if uid["preference"] == "dontcare":
+                if ls.spellcheck(inp,"dontcare"):
                     self._additional_requirements = uid["preference"]
                     if self._configuration["informal"]:
                         self.add_speech(

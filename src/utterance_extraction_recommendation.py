@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+import random
 from Levenshtein import distance
 
 def misspelling_checker(utterance: str, word: str, distance_threshold: int = 3):
@@ -21,6 +21,20 @@ def info_in_utterance(utterance: str, restaurant_df: pd.DataFrame, distance_thre
     food = ""
     pricerange = ""
     preference = ""
+
+    # a random restaurant
+    if utterance == "random":
+        num_rows = len(restaurant_df)
+
+        # Generate a random index within the range of row indices
+        random_index = random.randint(0, num_rows - 1)
+        random_row = restaurant_df.iloc[random_index]
+
+        return {
+            "food": random_row["food"],
+            "area": random_row["area"],
+            "pricerange": random_row["pricerange"]
+        }
 
     # Looking for food
     # Get unique values from the column and convert them to a list

@@ -11,8 +11,12 @@ import matplotlib.pyplot as plt
 import pickle
 
 # our code
-from src import classifiers as cl
-from src import text_classification as tc
+try:
+    from src import classifiers as cl
+    from src import text_classification as tc
+except:
+    import classifiers as cl
+    import text_classification as tc
 
 
 class FeedForwardNeuralNetwork:
@@ -53,7 +57,7 @@ class FeedForwardNeuralNetwork:
         y_train = to_categorical(y_train, num_classes=num_classes)
 
         # Print the training of the model, 0 = nothing printed, 1 = training progress bar, 2 = one line per epoch
-        print_training = 2
+        print_training = 0
         history = self.model.fit(x_train, y_train, epochs=7, batch_size=400, validation_split=0.2
                                  , shuffle=True, verbose=print_training)
         # monitoring the training progress and plotting the learning curves
@@ -119,15 +123,13 @@ def create_models(data_dir):
     }
 
     dt_classifier = cl.DialogActsClassifier(name="Decision tree classifier")
-    dt_classifier.train(df_train["utterance_content"], df_train["dialog_act"], hyperparams_dict=dt_params)
+    dt_classifier.train(df_train["utterance_content"], df_train["dialog_act"])
     tc.evaluate_model(dt_classifier, df_test)
 
     # decision tree without duplicates
     dt_classifier_dd = cl.DialogActsClassifier(name="Decision tree without duplicates")
     dt_classifier_dd.train(df_train_deduplicated["utterance_content"],
-                           df_train_deduplicated["dialog_act"],
-                           hyperparams_dict=dt_params
-                           )
+                           df_train_deduplicated["dialog_act"])
     tc.evaluate_model(dt_classifier_dd, df_test_deduplicated)
 
     # logistic regression
