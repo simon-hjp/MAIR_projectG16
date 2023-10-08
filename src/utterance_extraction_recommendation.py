@@ -44,11 +44,11 @@ def info_in_utterance(utterance: str, restaurant_df: pd.DataFrame, distance_thre
     for foodw in unique_foods_list:
         if foodw in utterance:
             food = foodw
-            print(f"food = {food}")
+            # print(f"food = {food}")
             break
         elif misspelling_checker(utterance, foodw, distance_threshold) != "":  # Misspelled word found
             food = misspelling_checker(utterance, foodw, distance_threshold)
-            print(f"food (matched with spelling mistake) = {food}")
+            # print(f"food (matched with spelling mistake) = {food}")
             break
         # elif distance(foodw, utterance) <= distance_threshold:
         #     food = foodw
@@ -60,11 +60,11 @@ def info_in_utterance(utterance: str, restaurant_df: pd.DataFrame, distance_thre
     for word in area_words:
         if word in utterance:
             area = word
-            print(f"area = {area}")
+            # print(f"area = {area}")
             break
         elif misspelling_checker(utterance, word, distance_threshold) != "":  # Misspelled word found
             area = misspelling_checker(utterance, word, distance_threshold)
-            print(f"area (matched with spelling mistake) = {area}")
+            # print(f"area (matched with spelling mistake) = {area}")
             break
 
     # Words that represent different price ranges
@@ -106,31 +106,31 @@ def info_in_utterance(utterance: str, restaurant_df: pd.DataFrame, distance_thre
     for cheap_words in cheap:
         if cheap_words in utterance:
             pricerange = "cheap"
-            print(f"pricerange = {pricerange}")
+            # print(f"pricerange = {pricerange}")
             break
         elif misspelling_checker(utterance, cheap_words, distance_threshold) != "":  # Misspelled word found
             pricerange = misspelling_checker(utterance, cheap_words, distance_threshold)
-            print(f"area (matched with spelling mistake) = {pricerange}")
+            # print(f"area (matched with spelling mistake) = {pricerange}")
             break
 
     for moderate_words in moderate:
         if moderate_words in utterance:
             pricerange = "moderate"
-            print(f"pricerange = {pricerange}")
+            # print(f"pricerange = {pricerange}")
             break
         elif misspelling_checker(utterance, moderate_words, distance_threshold) != "":  # Misspelled word found
             pricerange = misspelling_checker(utterance, moderate_words, distance_threshold)
-            print(f"pricerange (matched with spelling mistake) = {pricerange}")
+            # print(f"pricerange (matched with spelling mistake) = {pricerange}")
             break
 
     for expensive_words in expensive:
         if expensive_words in utterance:
             pricerange = "expensive"
-            print(f"pricerange: {pricerange}")
+            # print(f"pricerange: {pricerange}")
             break
         elif misspelling_checker(utterance, expensive_words, distance_threshold) != "":  # Misspelled word found
             pricerange = misspelling_checker(utterance, expensive_words, distance_threshold)
-            print(f"pricerange (matched with spelling mistake) = {pricerange}")
+            # print(f"pricerange (matched with spelling mistake) = {pricerange}")
             break
 
     preference_words = [
@@ -148,7 +148,7 @@ def info_in_utterance(utterance: str, restaurant_df: pd.DataFrame, distance_thre
     for additional_preference in preference_words:
         if additional_preference in utterance:
             preference = additional_preference
-            print(f"Additional preference: {preference}")
+            # print(f"Additional preference: {preference}")
 
     return {
         "food": food,
