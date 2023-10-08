@@ -9,8 +9,8 @@ from sklearn.metrics import classification_report
 
 ### our code
 
-from src import models
-from src import classifiers as cl
+import models
+import classifiers as cl
 
 ###
 # Data importing and initial preprocessing

@@ -12,7 +12,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 
 # our code
-from src import models
+import models
 
 # global label encoder and vectorizer
 label_encoder = LabelEncoder()
@@ -119,8 +119,8 @@ class DialogActsClassifier:
         vectorizer.fit(x_train)
         x_train_bow = vectorizer.transform(x_train)
 
-        # if a hyperparameter grid is specified, perform a grid search
-        if fit_hyperparams:
+        # for decision tree classifiers, if a hyperparameter grid is specified, perform a grid search
+        if "tree" in self.name and fit_hyperparams:
 
             dt_params = {
                 "criterion": ["gini", "entropy"],
