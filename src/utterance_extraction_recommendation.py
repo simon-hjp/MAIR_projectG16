@@ -224,7 +224,7 @@ def preference_reasoning(
             "This restaurant is romantic because you can stay a long time.",
         )
     if req_consequent == "not romantic":
-        rec_rests = rec_rests[rec_rests["length_stay"] == "busy"]
+        rec_rests = rec_rests[rec_rests["crowdedness"] == "busy"]
         return rec_rests, "This restaurant is not romantic because it is busy."
     return rec_rests, "This restaurant should be fine."
 
