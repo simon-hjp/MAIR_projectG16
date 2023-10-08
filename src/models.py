@@ -144,7 +144,7 @@ def create_models(data_dir):
                                                name="Logistic regression without duplicates")
     lr_classifier_dd.train(df_train_deduplicated["utterance_content"], df_train_deduplicated["dialog_act"])
     tc.evaluate_model(lr_classifier_dd, df_test_deduplicated)
-    
+
     # Feed-Forward Neural Network
     ffnn_classifier = cl.FeedForwardNeuralNetworkClassifier(name="Feed-Forward Neural Network")
     ffnn_classifier.train(df_train["utterance_content"], df_train["dialog_act"])
@@ -158,7 +158,7 @@ def create_models(data_dir):
     should_pickle = False
     # Pickle the object and save it to a file
     if should_pickle:
-        file_path = 'FeedForwardsNeuralNetwork-deDuplicated.pkl'
+        file_path = '../Data/FeedForwardsNeuralNetwork-deDuplicated.pkl'
         with open(file_path, 'wb') as file:
             pickle.dump(ffnn_classifier_dd, file)
 

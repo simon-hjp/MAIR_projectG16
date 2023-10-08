@@ -57,7 +57,7 @@ def dialog_system(config: dict):
     else:
         # Load the pickled object from the file
         print('Loading classifier')
-        with open('FeedForwardsNeuralNetwork-deDuplicated.pkl', 'rb') as file:
+        with open('Data/FeedForwardsNeuralNetwork-deDuplicated.pkl', 'rb') as file:
             classifier = pickle.load(file)
         print('Classifier is ready.')
 
