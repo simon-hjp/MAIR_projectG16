@@ -1,3 +1,5 @@
+import random
+
 import pandas as pd
 import numpy as np
 import time
@@ -83,10 +85,44 @@ def dialog_system(config: dict):
         inp = input('>>>')
         out = manager.logic(inp)
         if manager._configuration['delay'] > 0:
-            time.sleep(manager._configuration['delay'])
-        print(out)
+            delays = np.array([random.random(), random.random(), random.random(), random.random()])
+            delays /= sum(delays)
+            delays *= manager._configuration['delay']
+            time.sleep(delays[0])
+            print(".")
+            time.sleep(delays[1])
+            print("..")
+            time.sleep(delays[2])
+            print("...")
+            time.sleep(delays[3])
+        print(out.strip())
 
 if __name__ == "__main__":
-    configuration = ask_user_configurations()
-    print(configuration)
-    dialog_system(config=configuration)
+    #configuration = ask_user_configurations()
+
+    # Define the URL and link text
+    url = "https://forms.office.com/Pages/DesignPageV2.aspx?subpage=design&token=e5fc2499f31a45e6815ca9d5ebcf2649&id=oFgn10akD06gqkv5WkoQ5zmMNQ9l4eJJrWjubnAJsLxUOUZXT0NUTFBXNjhRRUFETENWNDAxTTNHRi4u"
+    link_text = "Please click this link and fill out the form:"
+
+    # Create the clickable link
+    clickable_link = f'{link_text}\n{url}'
+    # Print the clickable link
+    print(clickable_link)
+    input("Press the enter key to continue")
+
+
+    #print(configuration)
+    configurations = [[{'rulebaseline':True,'capitals':True,'informal':False,'delay':3},1],
+     [{'rulebaseline':True,'capitals':True,'informal':False,'delay':0},2],
+     [{'rulebaseline':True,'capitals':False,'informal':False,'delay':3},3],
+     [{'rulebaseline':True,'capitals':False,'informal':False,'delay':0},4]]
+
+    random.shuffle(configurations)
+
+    for configuration in configurations:
+        print("\n"*20)
+        print(f"This program version has the following settings")
+        dialog_system(config=configuration[0])
+        print(f"Please fill out the questionnaire section number {configuration[1]+1}"
+              f"before continuing with the program")
+        input("Press the enter key to continue")

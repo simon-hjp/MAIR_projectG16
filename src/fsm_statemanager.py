@@ -462,6 +462,7 @@ class FiniteStateMachine:
             if dialog_act == "ack" or dialog_act == "affirm" or dialog_act == "confirm":
                 self._preferred_area = self._probable_area
                 self._probable_area = ""
+
                 self.add_speech(
                     "Very well, you are interested in a restaurant in the {} area. "
                     "What price range are you interested in?".format(
