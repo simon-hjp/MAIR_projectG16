@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     for configuration in configurations:
         print("\n"*20)
-        print(f"This program version has the following settings")
+        #print(f"This program version has the following settings")
         dialog_system(config=configuration[0])
         print(f"Please fill out the questionnaire section number {configuration[1]+1}"
               f"before continuing with the program")
