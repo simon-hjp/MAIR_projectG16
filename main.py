@@ -101,7 +101,7 @@ if __name__ == "__main__":
     #configuration = ask_user_configurations()
 
     # Define the URL and link text
-    url = "https://forms.office.com/Pages/DesignPageV2.aspx?subpage=design&token=e5fc2499f31a45e6815ca9d5ebcf2649&id=oFgn10akD06gqkv5WkoQ5zmMNQ9l4eJJrWjubnAJsLxUOUZXT0NUTFBXNjhRRUFETENWNDAxTTNHRi4u"
+    url = "https://forms.office.com/e/0qMZzg52Eh"
     link_text = "Please click this link and fill out the form:"
 
     # Create the clickable link
