@@ -123,6 +123,6 @@ if __name__ == "__main__":
         print("\n"*20)
         #print(f"This program version has the following settings")
         dialog_system(config=configuration[0])
-        print(f"Please fill out the questionnaire section number {configuration[1]+1}"
-              f" before continuing with the program")
+        print(f"Please fill out the relevant questionnaire for section Version {configuration[1]}"
+              f" before continuing with this program")
         input("Press the enter key to continue")
