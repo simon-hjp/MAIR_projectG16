@@ -3,6 +3,8 @@
 # Might be too large for git to handle
 *.dat
 *.csv
+# include preprocessing steps notebook
+!data_processing.ipynb
 # testing file for personal use aswell
 ingo_work.py
 # Vscode auto-generated configurations
