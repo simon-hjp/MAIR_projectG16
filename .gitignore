@@ -3,6 +3,7 @@
 # Might be too large for git to handle
 *.dat
 *.csv
+*.png
 # include preprocessing steps notebook
 !data_processing.ipynb
 # testing file for personal use aswell
